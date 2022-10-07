@@ -1,0 +1,82 @@
+1-3:
+  1:
+    type: BUGFIX
+    description: "Many Bug Fixes and Improvements. Finally Stable."
+1-3-1:
+  1:
+    type: IMPORTANT
+    description: "Several improvements, patch."
+1-3-2:
+  1:
+    type: FEATURE
+    description: "Custom Material Support for newer versions"
+  2:
+    type: IMPORTANT
+    description: "Inventory performance improved"
+1-3-3:
+  1:
+    type: BUGFIX
+    description: "Several improvements in every aspect of the plugin."
+  2:
+    type: IMPORTANT
+    description: "Optimized Inventories."
+  3:
+    type: FEATURE
+    description: "Now you can view the updates in &#18FF00inventory format&7."
+  4:
+    type: FEATURE
+    description: "Added &#18FF00Post-Setup Commands &7fully customizable through config."
+1-3-4:
+  1:
+    type: FEATURE
+    description: "Interactive &#1E9E00APIs &7have been released."
+  2:
+    type: IMPORTANT
+    description: "The system has been decentralized to ensure improved performance."
+1-3-4-1:
+  1:
+    type: BUGFIX
+    description: "Fixed a bug that caused the plugin to crash when the player was in the inventory Updates."
+  2:
+    type: BUGFIX
+    description: "Fixed a bug that did not allow the plug-in to find a library for some versions."
+  3:
+    type: IMPORTANT
+    description: "Placeholders are now completely lowercase to avoid compatibility issues."
+1-3-5:
+  1:
+    type: FEATURE
+    description: "Ability to change &#1E9E00items &7in the chest GUI."
+  2:
+    type: FEATURE
+    description: "Anvil GUI &#1E9E00support &7for the Name Selector."
+  3:
+    type: FEATURE
+    description: "Furnace GUI &#1E9E00support &7for the Age Selector."
+  4:
+    type: FEATURE
+    description: "Added &#1E9E00CustomModel &7support for the Age Selector."
+  5:
+    type: FEATURE
+    description: "Added ability to set identity via command"
+  6:
+    type: IMPORTANT
+    description: "Changed the default post-command to /heal"
+  7:
+    type: FEATURE
+    description: "Now the staff will be able to change your identity via command"
+  8:
+    type: FEATURE
+    description: "Added Non-Binary Gender"
+  9:
+    type: FEATURE
+    description: "You can now overwrite your Identity"
+  10:
+    type: IMPORTANT
+    description: "Code has been restructured"
+  11:
+    type: FEATURE
+    description: "Commands executed according to the chosen gender."
+  12:
+    type: BUGFIX
+    description: "Fixed the problem of the inventory closing with the loading of the resourcepack"

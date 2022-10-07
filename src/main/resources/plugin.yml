@@ -1,0 +1,8 @@
+name: Identity
+version: '${project.version}'
+main: it.myke.identity.Identity
+api-version: 1.16
+authors: [ MikesLab ]
+description: Identity made by MikesLab group.
+depend:  [PlaceholderAPI]
+prefix: "Identity"

@@ -1,0 +1,71 @@
+identity {
+  hook = copyright
+  reload {
+    permission = identity.reload
+    hook = reload
+    help = Reloads the Identity configs & Inventories.
+  }
+  papi {
+    permission = identity.papi
+    hook = papi
+    help = Shows the placeholders of the plugin.
+  }
+  removePlayer offlineplayer:target {
+    permission = identity.remove.player
+    hook = removePlayer
+    help = Resets the Identity of a specified player.
+  }
+  showupdates {
+    permission = identity.showupdates
+    hook = showupdates
+    help = Show the latest added features.
+    playerOnly
+  }
+  setAge offlineplayer:target int:age {
+    playerOnly
+    permission = identity.set.age
+    hook = setAge
+    help = Sets the age of the player.
+  }
+  setName offlineplayer:target string:firstName string:lastName? {
+    playerOnly
+    permission = identity.set.name
+    hook = setName
+    help = Sets the name of the player.
+  }
+
+  setGender offlineplayer:target string:gender {
+    playerOnly
+    permission = identity.set.gender
+    hook = setGender
+    help = Sets the gender of the player.
+  }
+  gender {
+    playerOnly
+    permission = identity.edit.gender
+    hook = editGender
+    help = Overwrite actual gender.
+  }
+
+  age {
+    playerOnly
+    permission = identity.edit.age
+    hook = editAge
+    help = Overwrite actual age.
+  }
+
+  name {
+    playerOnly
+    permission = identity.edit.name
+    hook = editName
+    help = Overwrite actual name.
+  }
+
+  setup {
+    permission = identity.setup
+    hook = setup
+    help = Starts the Identity Setup of a player.
+    playerOnly
+  }
+
+}
