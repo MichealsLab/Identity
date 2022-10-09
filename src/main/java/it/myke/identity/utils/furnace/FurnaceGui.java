@@ -1,11 +1,15 @@
 package it.myke.identity.utils.furnace;
 
 import com.cryptomorin.xseries.XMaterial;
+import it.myke.identity.disk.Settings;
 import it.myke.identity.utils.FormatUtils;
 import it.myke.identity.utils.PersonUtil;
-import it.myke.identity.utils.config.ConfigLoader;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -14,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -26,7 +31,7 @@ import java.util.*;
 @Setter
 public class FurnaceGui implements Listener {
     private ArrayList<FurnaceElement> elements;
-    private String title;
+    private Component title;
     private Inventory inventory;
     private JavaPlugin plugin;
     private int actualAge;
@@ -34,11 +39,11 @@ public class FurnaceGui implements Listener {
     private PersonUtil personUtil;
     private boolean completed;
 
-    public FurnaceGui(String title, JavaPlugin plugin, PersonUtil personUtil) {
+    public FurnaceGui(Component title, JavaPlugin plugin, PersonUtil personUtil) {
         this.elements = new ArrayList<>();
         this.title = title;
         this.plugin = plugin;
-        this.actualAge = ConfigLoader.min_age;
+        this.actualAge = Settings.MIN_AGE;
         this.personUtil = personUtil;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -60,7 +65,7 @@ public class FurnaceGui implements Listener {
 
         Inventory inventory = Bukkit.createInventory(holder, InventoryType.FURNACE, title);
         for(int i = 0; i < elements.size(); i++) {
-            inventory.setItem(i, edit(elements.get(i).getStack(), elements.get(i).getCustomModelData(), Arrays.stream(elements.get(i).getText()).map(s -> s.replace("%actualage%", String.valueOf(actualAge))).toArray(String[]::new)));
+            inventory.setItem(i, edit(elements.get(i).getStack(), elements.get(i).getCustomModelData(), elements.get(i).getDisplayname(), elements.get(i).getLore()));
         }
         this.inventory = inventory;
         return this;
@@ -69,6 +74,15 @@ public class FurnaceGui implements Listener {
 
     public void show(Player player) {
         player.openInventory(inventory);
+    }
+
+    @EventHandler
+    public void onDisable(PluginDisableEvent event) {
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            if(player.getOpenInventory().getTopInventory().getHolder() instanceof FurnaceHolder) {
+                player.closeInventory();
+            }
+        }
     }
 
 
@@ -95,7 +109,7 @@ public class FurnaceGui implements Listener {
 
             if(element.isDynamic()) {
                 ItemStack customStack = getCustomStack();
-                ItemStack stack = customStack != null ? customStack : edit(element.getStack(), this.getCustomModelData(this.actualAge), element.getText());
+                ItemStack stack = customStack != null ? customStack : edit(element.getStack(), this.getCustomModelData(this.actualAge), element.getDisplayname(), element.getLore());
                 event.getClickedInventory().setItem(element.getLocation(), stack);
                 ((Player) event.getWhoClicked()).updateInventory();
             }
@@ -113,14 +127,14 @@ public class FurnaceGui implements Listener {
     }
 
     public ItemStack getCustomStack() {
-        if(plugin.getConfig().getConfigurationSection("inventories.age.data.years") != null) {
+        if(plugin.getConfig().getConfigurationSection("inventories.age.data.per-age-item") != null) {
             ConfigurationSection years = plugin.getConfig().getConfigurationSection("inventories.age.data.years");
             if(years.isConfigurationSection(String.valueOf(actualAge))) {
                 ItemStack stack = XMaterial.matchXMaterial(years.getString(actualAge + ".material")).get().parseItem();
                 ItemMeta meta = stack.getItemMeta();
-                meta.setDisplayName(FormatUtils.color(years.getString(actualAge + ".name").replace("%actualage%", String.valueOf(actualAge))));
-                List<String> lore = FormatUtils.replaceList(years.getStringList(actualAge + ".lore"), String.valueOf(actualAge), "%actualage%");
-                meta.setLore(FormatUtils.color(lore));
+                meta.displayName(MiniMessage.miniMessage().deserialize(years.getString(actualAge + ".name").replace("%actualage%", String.valueOf(actualAge))).decoration(TextDecoration.ITALIC, false));
+                List<Component> lore = Settings.translate(FormatUtils.replaceList(years.getStringList(actualAge + ".lore"), String.valueOf(actualAge), "%actualage%"));
+                meta.lore(lore);
                 meta.setCustomModelData(years.getInt(actualAge + ".custom-model-data"));
                 stack.setItemMeta(meta);
                 return stack;
@@ -130,11 +144,16 @@ public class FurnaceGui implements Listener {
     }
 
 
-    private ItemStack edit(ItemStack itemStack, int customModelData, String... data) {
+    private ItemStack edit(ItemStack itemStack, int customModelData, Component displayName, List<Component> lore) {
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(FormatUtils.color(data[0].replace("%actualage%", String.valueOf(actualAge))));
-        if(data.length > 1) {
-            itemMeta.setLore(Collections.singletonList(FormatUtils.color(data[1].replace("%actualage%", String.valueOf(actualAge)))));
+        itemMeta.displayName(displayName.replaceText(TextReplacementConfig.builder().matchLiteral("%actualage%").replacement(String.valueOf(actualAge)).build()));
+        if(lore != null) {
+            List<Component> finalLore = new ArrayList<>();
+            for(Component line : lore) {
+                finalLore.add(line.replaceText(TextReplacementConfig.builder().matchLiteral("%actualage%").replacement(String.valueOf(actualAge)).build()).decoration(TextDecoration.ITALIC, false));
+            }
+
+            itemMeta.lore(finalLore);
         }
 
         if(customModelData != -1) {

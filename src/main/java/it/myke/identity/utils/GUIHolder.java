@@ -3,11 +3,16 @@ package it.myke.identity.utils;
 
 import it.myke.identity.inventories.InventoryType;
 import lombok.AllArgsConstructor;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 @AllArgsConstructor
-public class GUIHolder implements InventoryHolder {
+public class GUIHolder implements InventoryHolder, Listener {
     InventoryType inventory;
 
     @Override
@@ -15,8 +20,14 @@ public class GUIHolder implements InventoryHolder {
         return null;
     }
 
-    public InventoryType getEnum() {
-        return inventory;
+    @EventHandler
+    public void onDisable(PluginDisableEvent event) {
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            if(player.getOpenInventory().getTopInventory().getHolder() instanceof GUIHolder) {
+                player.closeInventory();
+            }
+        }
     }
+
 }
 

@@ -22,14 +22,14 @@
     description: "Optimized Inventories."
   3:
     type: FEATURE
-    description: "Now you can view the updates in &#18FF00inventory format&7."
+    description: "Now you can view the updates in <color:#18FF00>inventory format<gray>."
   4:
     type: FEATURE
-    description: "Added &#18FF00Post-Setup Commands &7fully customizable through config."
+    description: "Added <color:#18FF00>Post-Setup Commands <gray>fully customizable through config."
 1-3-4:
   1:
     type: FEATURE
-    description: "Interactive &#1E9E00APIs &7have been released."
+    description: "Interactive <color:#1E9E00>APIs <gray>have been released."
   2:
     type: IMPORTANT
     description: "The system has been decentralized to ensure improved performance."
@@ -46,16 +46,16 @@
 1-3-5:
   1:
     type: FEATURE
-    description: "Ability to change &#1E9E00items &7in the chest GUI."
+    description: "Ability to change <color:#1E9E00>items <gray>in the chest GUI."
   2:
     type: FEATURE
-    description: "Anvil GUI &#1E9E00support &7for the Name Selector."
+    description: "Anvil GUI <color:#1E9E00>support <gray>for the Name Selector."
   3:
     type: FEATURE
-    description: "Furnace GUI &#1E9E00support &7for the Age Selector."
+    description: "Furnace GUI <color:#1E9E00>support <gray>for the Age Selector."
   4:
     type: FEATURE
-    description: "Added &#1E9E00CustomModel &7support for the Age Selector."
+    description: "Added <color:#1E9E00>CustomModel <gray>support for the Age Selector."
   5:
     type: FEATURE
     description: "Added ability to set identity via command"
@@ -72,11 +72,11 @@
     type: FEATURE
     description: "You can now overwrite your Identity"
   10:
-    type: IMPORTANT
-    description: "Code has been restructured"
-  11:
     type: FEATURE
     description: "Commands executed according to the chosen gender."
+  11:
+    type: IMPORTANT
+    description: "Code has been restructured"
   12:
     type: BUGFIX
     description: "Fixed the problem of the inventory closing with the loading of the resourcepack"

@@ -7,14 +7,19 @@ import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
 import it.myke.identity.Identity;
 import it.myke.identity.utils.CustomHeads;
-import it.myke.identity.utils.FormatUtils;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import static it.myke.identity.inventories.Inventories.inventories;
+import static it.myke.identity.update.UpdateType.FEATURE;
+import static it.myke.identity.update.UpdateType.IMPORTANT;
 
 public class UpdateShower {
     private final String bugfix_headValue = "ff9d9de62ecae9b798555fd23e8ca35e2605291939c1862fe79066698c9508a7";
@@ -47,7 +52,8 @@ public class UpdateShower {
                     click.getWhoClicked().closeInventory();
                     getInventoryByUpdateVersion(versions.get(position - 1)).show(click.getWhoClicked());
                     return true;
-                }, FormatUtils.color("&#FF0048Go to previous update &7(" + versions.get(position - 1).replace("-", ".") + ")")));
+                }, LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage()
+                        .deserialize("<color:#FF0048>Go to previous update <gray>(" + versions.get(position - 1).replace("-", ".") + ")").decoration(TextDecoration.ITALIC, false))));
             }
 
             if (!(position + 1 >= versions.size())) {
@@ -55,8 +61,7 @@ public class UpdateShower {
                     click.getWhoClicked().closeInventory();
                     getInventoryByUpdateVersion(versions.get(position + 1)).show(click.getWhoClicked());
                     return true;
-                }
-                        , FormatUtils.color("&#2FAEFFGo to next update &7(" + versions.get(position + 1).replace("-", ".") + ")")));
+                }, LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize("<color:#2FAEFF>Go to next update <gray>(" + versions.get(position + 1).replace("-", ".") + ")").decoration(TextDecoration.ITALIC, false))));
             }
         }
 
@@ -70,7 +75,7 @@ public class UpdateShower {
             if(!identity.getConfig().getBoolean("updates.menu-shown")) {
                 identity.getConfig().set("updates.menu-shown", true);
                 identity.saveConfig();
-                close.getPlayer().sendMessage(FormatUtils.color("&#17C600Thank you for using Identity! Next Updates will be shown to you only if you want it by command, &7/identity showupdates&#2C3BFF."));
+                close.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize("<color:#17C600>Thank you for using Identity! Next Updates will be shown to you only if you want it by command, <gray>/identity showupdates<color:#17C600>."));
             }
             return true;
         });
@@ -87,15 +92,11 @@ public class UpdateShower {
 
 
     public ItemStack getUpdateItemStack(Update update) {
-        switch (update.getUpdateType()) {
-            case BUGFIX:
-                return CustomHeads.getCustomHead(bugfix_headValue, FormatUtils.color("&#FF3131Bug-Fix"), Collections.singletonList(FormatUtils.color("&#FF3131&l* &7" + update.getUpdateShortDescription())));
-            case IMPORTANT:
-                return CustomHeads.getCustomHead(important_headValue, FormatUtils.color("&#D98A00Fix"), Collections.singletonList(FormatUtils.color("&#D98A00&l* &7" + update.getUpdateShortDescription())));
-            case FEATURE:
-                return CustomHeads.getCustomHead(feature_headValue, FormatUtils.color("&#18FF00Feature"), Collections.singletonList(FormatUtils.color("&#18FF00&l+ &7" + update.getUpdateShortDescription())));
-        }
-        return XMaterial.BARRIER.parseItem();
+        return switch (update.updateType()) {
+            case BUGFIX -> CustomHeads.getCustomHead(bugfix_headValue, MiniMessage.miniMessage().deserialize("<color:#FF3131>Bug-Fix").decoration(TextDecoration.ITALIC, false), Collections.singletonList(MiniMessage.miniMessage().deserialize("<color:#FF3131><bold>*</bold> <gray>" + update.updateShortDescription()).decoration(TextDecoration.ITALIC, false)));
+            case IMPORTANT -> CustomHeads.getCustomHead(important_headValue, MiniMessage.miniMessage().deserialize("<color:#D98A00>Fix").decoration(TextDecoration.ITALIC, false), Collections.singletonList(MiniMessage.miniMessage().deserialize("<color:#D98A00><bold>*</bold> <gray>" + update.updateShortDescription()).decoration(TextDecoration.ITALIC, false)));
+            case FEATURE -> CustomHeads.getCustomHead(feature_headValue, MiniMessage.miniMessage().deserialize("<color:#18FF00>Feature").decoration(TextDecoration.ITALIC, false), Collections.singletonList(MiniMessage.miniMessage().deserialize("<color:#18FF00><bold>+</bold> <gray>" + update.updateShortDescription()).decoration(TextDecoration.ITALIC, false)));
+        };
     }
 
 
@@ -104,18 +105,7 @@ public class UpdateShower {
 }
 
 
-class Update {
-
-    @Getter
-    private final UpdateType updateType;
-    @Getter
-    private final String updateShortDescription;
-
-    public Update(final UpdateType updateType, final String updateShortDescription) {
-        this.updateType = updateType;
-        this.updateShortDescription = updateShortDescription;
-    }
-
+record Update(@Getter UpdateType updateType, @Getter String updateShortDescription) {
 }
 
 

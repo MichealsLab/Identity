@@ -1,10 +1,13 @@
 package it.myke.identity.utils.inventory;
 
 import com.cryptomorin.xseries.XMaterial;
+import it.myke.identity.disk.Settings;
 import it.myke.identity.utils.CustomHeads;
-import it.myke.identity.utils.FormatUtils;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -17,16 +20,18 @@ public class InventoryBuilder {
     private final String chars = "abcdefghijklmnopqrstuvwxyzA";
     @Getter private ArrayList<ActionElement> elements;
     @Getter private ItemStack filler;
+    @Getter private Component title;
 
 
     public InventoryBuilder getBuilder(CustomConfigsInit customConfigsInit, String inventory) {
         elements = new ArrayList<>();
+        title = MiniMessage.miniMessage().deserialize(customConfigsInit.getInventoriesConfig().getString(inventory + ".title"));
         for (String s : customConfigsInit.getInventoriesConfig().getConfigurationSection(inventory + ".elements").getKeys(false)) {
             ConfigurationSection elementSection = customConfigsInit.getInventoriesConfig().getConfigurationSection(inventory + ".elements." + s);
             Action action = getActionOrDefault(elementSection);
             int intPosition = Integer.parseInt(elementSection.getName());
             char position = translate(Integer.parseInt(elementSection.getName()));
-            elements.add(new ActionElement(intPosition ,position, action, parseStack(elementSection), elementSection.getString("name"), elementSection.getStringList("lore")));
+            elements.add(new ActionElement(intPosition ,position, action, parseStack(elementSection), MiniMessage.miniMessage().deserialize(elementSection.getString("name")), Settings.translate(elementSection.getStringList("lore"))));
         }
         String fillerPath = customConfigsInit.getInventoriesConfig().getString(inventory + ".filler");
         if(fillerPath != null) {
@@ -40,15 +45,15 @@ public class InventoryBuilder {
         if(!Objects.equals(elementSection.getString("material"), "CUSTOM_HEAD")) {
             ItemStack stack = XMaterial.matchXMaterial(elementSection.getString("material")).get().parseItem();
             ItemMeta meta = stack.getItemMeta();
-            meta.setDisplayName(elementSection.getString("name"));
+            meta.displayName(MiniMessage.miniMessage().deserialize(elementSection.getString("name")).decoration(TextDecoration.ITALIC, false));
+            meta.lore(Settings.translate(elementSection.getStringList("lore")));
             meta.setCustomModelData(elementSection.getInt("custom-model-data"));
-            meta.setLore(elementSection.getStringList("lore"));
             stack.setItemMeta(meta);
             return stack;
         }
 
         if(elementSection.contains("texture")) {
-            return CustomHeads.getCustomHead(elementSection.getString("texture"), FormatUtils.color(elementSection.getString("name")), FormatUtils.color(elementSection.getStringList("lore")));
+            return CustomHeads.getCustomHead(elementSection.getString("texture"), MiniMessage.miniMessage().deserialize(elementSection.getString("name")), Settings.translate(elementSection.getStringList("lore")));
         } else Bukkit.getLogger().severe("Texture value not found for " + elementSection.getName());
 
         Bukkit.getLogger().severe("Error while parsing inventory element: " + elementSection.getName() + " in inventory: " + elementSection.getParent().getName());

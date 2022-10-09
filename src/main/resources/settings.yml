@@ -1,0 +1,59 @@
+updates-shown: true
+onjoin-menu-enabled: true
+age-enabled: true
+gender-enabled: true
+name-enabled: true
+lastname-required: true
+min-age: 10
+max-age: 80
+firstname-max-length: 8
+lastname-max-length: 8
+firstname-min-length: 2
+lastname-min-length: 2
+alphanumeric-only: true
+name-titlebar-enabled: true
+inventory-name-type: ANVIL #You can choose between ANVIL and CHEST
+inventory-age-type: FURNACE #You can choose between FURNACE and CHEST
+menu-show-delay: 10000 #In milliseconds
+placeholders:
+  male: "MALE"
+  female: "FEMALE"
+  nonbinary: "NON-BINARY"
+anvil-gui:
+  title: "Name"
+  item:
+    material: NAME_TAG
+    custom-model-data: 10030
+    display-name: "<green>Insert your name"
+    lore:
+      - "<gray>Insert your name"
+
+post-process:
+  gender-commands:
+    non-binary:
+      executor: CONSOLE
+      command: "/heal {PLAYER}"
+    male:
+      executor: CONSOLE
+      command: "/heal {PLAYER}"
+    female:
+      executor: CONSOLE
+      command: "/heal {PLAYER}"
+
+  commands:
+    heal-command:
+      executor: CONSOLE
+      command: "/heal {PLAYER}"
+
+inventories:
+  age:
+    data:
+      per-age-item:
+        25:
+          custom-model-data: 10038
+          material: PAPER
+          name: "<green>Click to confirm (%actualage%)"
+          lore:
+            - "<gray>This is your age, click to confirm."
+
+

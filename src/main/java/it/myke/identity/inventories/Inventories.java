@@ -8,12 +8,13 @@ import de.themoep.inventorygui.DynamicGuiElement;
 import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
 import it.myke.identity.Identity;
+import it.myke.identity.disk.Lang;
+import it.myke.identity.disk.Settings;
+import it.myke.identity.obj.Person;
 import it.myke.identity.update.UpdateReader;
 import it.myke.identity.update.UpdateShower;
 import it.myke.identity.utils.FormatUtils;
-import it.myke.identity.utils.GUIHolder;
 import it.myke.identity.utils.PersonUtil;
-import it.myke.identity.utils.config.ConfigLoader;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.furnace.FurnaceElement;
 import it.myke.identity.utils.furnace.FurnaceGui;
@@ -21,16 +22,21 @@ import it.myke.identity.utils.inventory.Action;
 import it.myke.identity.utils.inventory.ActionElement;
 import it.myke.identity.utils.inventory.InventoryBuilder;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,9 +49,9 @@ public class Inventories extends AbstractInventories {
     public Inventories(Identity plugin, CustomConfigsInit customConfigsInit, PersonUtil personUtil, PostProcessCommands postProcessCommands, boolean setup) {
         inventories = new HashMap<>();
         cooldown = new HashMap<>();
-        if(ConfigLoader.name) inventories.put("name", getNameInventory(plugin, customConfigsInit, setup));
-        if(ConfigLoader.gender) inventories.put("gender", getGenderChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup));
-        if(ConfigLoader.age) inventories.put("age", getAgeChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup));
+        if(Settings.NAME_ENABLED) inventories.put("name", getNameInventory(plugin, customConfigsInit, setup));
+        if(Settings.GENDER_ENABLED) inventories.put("gender", getGenderChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup));
+        if(Settings.AGE_ENABLED) inventories.put("age", getAgeChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup));
 
         ArrayList<String> registeredVersions = new UpdateReader().getVersions(plugin);
 
@@ -68,8 +74,8 @@ public class Inventories extends AbstractInventories {
                 "jklmnopqr",
                 "stuvwxyzA",
         };
-        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getNameHolder(), ConfigLoader.invName_name, rows);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "name");
+        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getNameHolder(), LegacyComponentSerializer.legacySection().serialize(inventoryBuilder.getTitle()), rows);
         inventoryGui.setFiller(inventoryBuilder.getFiller());
 
         for(ActionElement actionElement : inventoryBuilder.getElements()) {
@@ -88,19 +94,14 @@ public class Inventories extends AbstractInventories {
 
 
 
-    public static ItemStack getCustomStack(Identity plugin) {
-        if(plugin.getConfig().getConfigurationSection("inventories.name.anvil-gui.item") != null) {
-            ConfigurationSection data = plugin.getConfig().getConfigurationSection("inventories.name.anvil-gui.item");
-            ItemStack stack = XMaterial.matchXMaterial(data.getString("material")).get().parseItem();
-            ItemMeta meta = stack.getItemMeta();
-            meta.setDisplayName(FormatUtils.color(data.getString("displayName")));
-            List<String> lore = data.getStringList("lore");
-            meta.setLore(FormatUtils.color(lore));
-            meta.setCustomModelData(data.getInt("custom-model-data"));
-            stack.setItemMeta(meta);
-            return stack;
-        }
-        return null;
+    public static ItemStack getCustomStack() {
+        ItemStack stack = XMaterial.matchXMaterial(Settings.ANVIL_GUI__ITEM__MATERIAL).parseItem();
+        ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Settings.ANVIL_GUI__ITEM__DISPLAY_NAME.decoration(TextDecoration.ITALIC, false));
+        meta.lore(Settings.ANVIL_GUI__ITEM__LORE);
+        meta.setCustomModelData(Settings.ANVIL_GUI__ITEM__CUSTOM_MODEL_DATA);
+        stack.setItemMeta(meta);
+        return stack;
     }
 
 
@@ -109,9 +110,14 @@ public class Inventories extends AbstractInventories {
     private boolean getNameListener(Player player, InventoryGui inventoryGui, boolean setup) {
         processStarted.put(player.getUniqueId(), setup);
         inventoryGui.close();
-        player.sendMessage(ConfigLoader.message_HeadClicked_name_ChatMessage);
-        if(ConfigLoader.invName_titleBar_enabled) {
-            player.sendTitle(ConfigLoader.message_title_Title, ConfigLoader.message_title_Subtitle, 1, 70, 1);
+        player.sendMessage(Lang.INSERT_NAME);
+        if(Settings.NAME_TITLEBAR_ENABLED) {
+            Title title = Title.title(
+                    Lang.INSERT_NAME_TITLE,
+                    Lang.INSERT_NAME_SUBTITLE,
+                    Title.Times.of(Duration.ofMillis(1), Duration.ofMillis(70), Duration.ofMillis(1))
+            );
+            player.showTitle(title);
         }
         return true;
     }
@@ -135,8 +141,8 @@ public class Inventories extends AbstractInventories {
                 "jklmnopqr",
                 "stuvwxyzA",
         };
-        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getNameHolder(), ConfigLoader.invName_name, rows);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "name");
+        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getNameHolder(), LegacyComponentSerializer.legacySection().serialize(inventoryBuilder.getTitle()), rows);
         inventoryGui.setFiller(inventoryBuilder.getFiller());
 
         for(ActionElement actionElement : inventoryBuilder.getElements()) {
@@ -162,26 +168,25 @@ public class Inventories extends AbstractInventories {
                 "stuvwxyzA",
         };
         InventoryManager inventoryManager = new InventoryManager();
-        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getGenderHolder(), ConfigLoader.invGender_name, rows);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "gender");
+        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getGenderHolder(), LegacyComponentSerializer.legacySection().serialize(inventoryBuilder.getTitle()), rows);
         inventoryGui.setFiller(inventoryBuilder.getFiller());
 
-        HashBasedTable<Action, String, String> table = HashBasedTable.create();
+        HashBasedTable<Action, String, Component> table = HashBasedTable.create();
 
-        table.put(Action.FEMALE, ConfigLoader.message_female, ConfigLoader.message_femaleClicked);
-        table.put(Action.NONBINARY, ConfigLoader.message_non_binary, ConfigLoader.message_nonBinaryClicked);
-        table.put(Action.MALE, ConfigLoader.message_male, ConfigLoader.message_maleClicked);
-
+        table.put(Action.FEMALE, Lang.FEMALE_GENDER, Lang.GENDER_FEMALE_SELECTED);
+        table.put(Action.NONBINARY, Lang.NON_BINARY_GENDER, Lang.GENDER_NON_BINARY_SELECTED);
+        table.put(Action.MALE, Lang.MALE_GENDER, Lang.GENDER_MALE_SELECTED);
         for(ActionElement actionElement : inventoryBuilder.getElements()) {
             inventoryGui.addElement(actionElement.getCharPos(), actionElement.getStack(), click -> {
                 if(table.containsRow(actionElement.getAction())) {
-                    Table.Cell<Action, String, String> genderCell = table.cellSet().stream().filter(cell -> cell.getRowKey() == actionElement.getAction()).findFirst().get();
+                    Table.Cell<Action, String, Component> genderCell = table.cellSet().stream().filter(cell -> cell.getRowKey() == actionElement.getAction()).findFirst().get();
                     personUtil.getPerson(click.getWhoClicked().getUniqueId()).setGender(genderCell.getColumnKey());
                     click.getWhoClicked().sendMessage(genderCell.getValue());
                 }
                 if (!setup) {
                     customConfigsInit.saveInConfig(click.getWhoClicked().getUniqueId(), personUtil);
-                    click.getWhoClicked().sendMessage(ConfigLoader.message_modified_gender);
+                    click.getWhoClicked().sendMessage(Lang.GENDER_EDITED);
                     click.getWhoClicked().closeInventory();
                     return true;
                 }
@@ -191,6 +196,16 @@ public class Inventories extends AbstractInventories {
             });
         }
 
+        inventoryGui.setCloseAction(close -> {
+            if(personUtil.isPerson(close.getPlayer().getUniqueId())) {
+                Person person = personUtil.getPerson(close.getPlayer().getUniqueId());
+                if(person.getGender() == null) {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> inventoryGui.show(close.getPlayer()), 1);
+                    return false;
+                }
+            }
+            return false;
+        });
 
 
         return inventoryGui;
@@ -205,58 +220,69 @@ public class Inventories extends AbstractInventories {
                 "jklmnopqr",
                 "stuvwxyzA",
         };
-        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getAgeHolder(), ConfigLoader.invAge_name, rows);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "age");
+        InventoryGui inventoryGui = new InventoryGui(plugin, plugin.getAgeHolder(), LegacyComponentSerializer.legacySection().serialize(inventoryBuilder.getTitle()), rows);
         inventoryGui.setFiller(inventoryBuilder.getFiller());
-        int minAge = ConfigLoader.min_age;
-        AtomicInteger actualAge = new AtomicInteger(ConfigLoader.min_age);
-        int maxAge = ConfigLoader.max_age;
+        int minAge = Settings.MIN_AGE;
+        int maxAge = Settings.MAX_AGE;
+        AtomicInteger actualAge = new AtomicInteger(minAge);
 
         for(ActionElement actionElement : inventoryBuilder.getElements()) {
 
             if (actionElement.getAction() == Action.CONFIRM_AGE) {
                 inventoryGui.addElement(new DynamicGuiElement(actionElement.getCharPos(), (viewer) -> new StaticGuiElement(actionElement.getCharPos(), actionElement.getStack(), click -> {
                     personUtil.getPerson(click.getWhoClicked().getUniqueId()).setAge(actualAge.get());
-                    click.getWhoClicked().sendMessage(ConfigLoader.message_ageConfirmed);
+                    click.getWhoClicked().sendMessage(Lang.AGE_CONFIRMED);
                     new InventoryManager().openNextInventory((Player) click.getWhoClicked(), plugin, personUtil, this, postProcessCommands, customConfigsInit, setup);
                     if(!setup) {
                         customConfigsInit.saveInConfig(click.getWhoClicked().getUniqueId(), personUtil);
-                        click.getWhoClicked().sendMessage(ConfigLoader.message_modified_age);
+                        click.getWhoClicked().sendMessage(Lang.AGE_EDITED);
                         click.getWhoClicked().closeInventory();
                     }
                     return true;
-                }, FormatUtils.color(FormatUtils.color(actionElement.getDisplayname().replace("%actualage%", String.valueOf(actualAge.get())))), FormatUtils.loreListToSingleString(FormatUtils.color(
-                        FormatUtils.replaceList(actionElement.getLore(), "%actualage%", String.valueOf(actualAge.get())))))));
+                },LegacyComponentSerializer.legacySection().serialize(actionElement.getDisplayname()).replace("%actualage%", String.valueOf(actualAge.get())),
+                        FormatUtils.loreListToSingleString(Settings.translateComponent(actionElement.getLore())).replace("%actualage%", String.valueOf(actualAge.get())))));
             } else {
 
                 inventoryGui.addElement(actionElement.getCharPos(), actionElement.getStack(), click -> {
 
                     switch (actionElement.getAction()) {
-                        case REMOVE_AGE:
+                        case REMOVE_AGE -> {
                             if (!(actualAge.get() - 1 < minAge)) {
                                 actualAge.getAndDecrement();
                             } else {
-                                FormatUtils.sendActionbar((Player) click.getWhoClicked(), ConfigLoader.message_minAgeReached);
+                                click.getWhoClicked().sendActionBar(Lang.MIN_AGE_REACHED);
                                 XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                             }
                             click.getGui().draw();
-                            break;
-
-                        case ADD_AGE:
+                        }
+                        case ADD_AGE -> {
                             if (!(actualAge.get() + 1 > maxAge)) {
                                 actualAge.getAndIncrement();
                             } else {
-                                FormatUtils.sendActionbar((Player) click.getWhoClicked(), ConfigLoader.message_maxAgeReached);
+                                click.getWhoClicked().sendActionBar(Lang.MAX_AGE_REACHED);
                                 XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                             }
                             click.getGui().draw();
-                            break;
+                        }
                     }
 
                     return true;
                 });
             }
         }
+
+        inventoryGui.setCloseAction(close -> {
+            if(personUtil.isPerson(close.getPlayer().getUniqueId())) {
+                Person person = personUtil.getPerson(close.getPlayer().getUniqueId());
+                if(person.getAge() == -1) {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> inventoryGui.show(close.getPlayer()), 1);
+                    return false;
+                }
+            }
+            return false;
+        });
+
         return inventoryGui;
     }
 
@@ -266,72 +292,68 @@ public class Inventories extends AbstractInventories {
 
     @Override
     public FurnaceGui getAgeFurnaceGUI(Player player, Identity plugin, CustomConfigsInit customConfigsInit, PersonUtil personUtil, PostProcessCommands postProcessCommands, boolean setup) {
-        int minAge = ConfigLoader.min_age;
-        int maxAge = ConfigLoader.max_age;
-        AtomicInteger actualAge = new AtomicInteger(ConfigLoader.min_age);
+        int minAge = Settings.MIN_AGE;
+        int maxAge = Settings.MAX_AGE;
+        AtomicInteger actualAge = new AtomicInteger(minAge);
 
-        FurnaceGui furnaceGui = new FurnaceGui(ConfigLoader.invAge_name, plugin, personUtil);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "furnace.age");
+        FurnaceGui furnaceGui = new FurnaceGui(inventoryBuilder.getTitle(), plugin, personUtil);
 
         for(ActionElement element : inventoryBuilder.getElements()) {
             switch (element.getAction()) {
-                case REMOVE_AGE:
-                    furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
-                        long now = System.currentTimeMillis();
-                        long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
-                        if(now >= coolDownEnd) {
-                            if (actualAge.get() - 1 >= minAge) {
-                                actualAge.getAndDecrement();
-                                furnaceGui.setActualAge(actualAge.get());
+                case REMOVE_AGE -> furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
+                    long now = System.currentTimeMillis();
+                    long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
+                    if (now >= coolDownEnd) {
+                        if (actualAge.get() - 1 >= minAge) {
+                            actualAge.getAndDecrement();
+                            furnaceGui.setActualAge(actualAge.get());
 
-                                now = System.currentTimeMillis();
-                                long cooldownMs = 200;
-                                cooldown.put(player.getUniqueId(), now + cooldownMs);
-                            } else {
-                                FormatUtils.sendActionbar((Player) click.getWhoClicked(), ConfigLoader.message_minAgeReached);
-                                XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
-                            }
+                            now = System.currentTimeMillis();
+                            long cooldownMs = 200;
+                            cooldown.put(player.getUniqueId(), now + cooldownMs);
+                        } else {
+                            click.getWhoClicked().sendActionBar(Lang.MIN_AGE_REACHED);
+                            XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                         }
-                    }, FormatUtils.color(element.getDisplayname()), FormatUtils.loreListToSingleString(FormatUtils.color(element.getLore()))));
-                    break;
+                    }
+                }, element.getDisplayname(),
+                        element.getLore()));
+                case ADD_AGE -> furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
+                    long now = System.currentTimeMillis();
+                    long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
+                    if (now >= coolDownEnd) {
+                        if (actualAge.get() + 1 <= maxAge) {
+                            actualAge.getAndIncrement();
+                            furnaceGui.setActualAge(actualAge.get());
 
-                case ADD_AGE:
-                    furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
-                        long now = System.currentTimeMillis();
-                        long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
-                        if(now >= coolDownEnd) {
-                            if (actualAge.get() + 1 <= maxAge) {
-                                actualAge.getAndIncrement();
-                                furnaceGui.setActualAge(actualAge.get());
-
-                                now = System.currentTimeMillis();
-                                long cooldownMs = 200;
-                                cooldown.put(player.getUniqueId(), now + cooldownMs);
-                            } else {
-                                FormatUtils.sendActionbar((Player) click.getWhoClicked(), ConfigLoader.message_maxAgeReached);
-                                XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
-                            }
+                            now = System.currentTimeMillis();
+                            long cooldownMs = 200;
+                            cooldown.put(player.getUniqueId(), now + cooldownMs);
+                        } else {
+                            click.getWhoClicked().sendActionBar(Lang.MAX_AGE_REACHED);
+                            XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                         }
-                    }, FormatUtils.color(element.getDisplayname()), FormatUtils.loreListToSingleString(FormatUtils.color(element.getLore()))));
-                    break;
-
-                case CONFIRM_AGE:
+                    }
+                }, element.getDisplayname(),
+                        element.getLore()));
+                case CONFIRM_AGE -> {
                     furnaceGui.setActualAge(actualAge.get());
                     ItemStack ageStack = furnaceGui.getCustomStack() != null ? furnaceGui.getCustomStack() : element.getStack();
-
                     furnaceGui.addElement(new FurnaceElement(element.getIntPos(), true, -1, ageStack, click -> {
                         personUtil.getPerson(player.getUniqueId()).setAge(actualAge.get());
                         furnaceGui.setCompleted(true);
                         if (!setup) {
                             customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
-                            player.sendMessage(ConfigLoader.message_modified_age);
+                            player.sendMessage(Lang.AGE_EDITED);
                             player.closeInventory();
                             return;
                         }
                         InventoryManager inventoryManager = new InventoryManager();
                         inventoryManager.openNextInventory(player, plugin, personUtil, this, postProcessCommands, customConfigsInit, setup);
-                    }, FormatUtils.color(element.getDisplayname()), FormatUtils.loreListToSingleString(FormatUtils.color(element.getLore()))));
-                    break;
+                    }, element.getDisplayname(),
+                            element.getLore()));
+                }
             }
 
         }
@@ -347,14 +369,15 @@ public class Inventories extends AbstractInventories {
     public AnvilGUI.Builder getNameAnvilGUI(Identity plugin, CustomConfigsInit customConfigsInit, PersonUtil personUtil, PostProcessCommands postProcessCommands, boolean setup) {
         return new AnvilGUI.Builder()
                 .onComplete((player, text) -> {                                    //called when the inventory output slot is clicked
-                    if(!ConfigLoader.invName_onlyName) {
+                    if(Settings.LASTNAME_REQUIRED) {
                         if(!text.contains(" ")) {
-                            player.sendMessage(ConfigLoader.message_surname_needed);
-                            return AnvilGUI.Response.text(ConfigLoader.message_short_surname_needed);
+                            player.sendMessage(Lang.LASTNAME_REQUIRED);
+                            return AnvilGUI.Response.text(LegacyComponentSerializer.legacySection().serialize(Lang.LASTNAME_REQUIRED));
                         } else {
                             String[] textSplit = text.trim().replaceAll(" +", " ").split(" ");
                             personUtil.getPerson(player.getUniqueId()).setName(FormatUtils.firstUppercase(textSplit[0]) + " " + FormatUtils.firstUppercase(textSplit[1]));
-                            player.sendMessage(ConfigLoader.message_name_set.replace("%s", FormatUtils.firstUppercase(textSplit[0]) + " " + FormatUtils.firstUppercase(textSplit[1])));
+                            player.sendMessage(Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
+                                    .matchLiteral("%name%").replacement(FormatUtils.firstUppercase(textSplit[0]) + " " + FormatUtils.firstUppercase(textSplit[1])).build()));
                             return AnvilGUI.Response.close();
                         }
                     } else {
@@ -369,7 +392,9 @@ public class Inventories extends AbstractInventories {
 
 
                         personUtil.getPerson(player.getUniqueId()).setName(FormatUtils.firstUppercase(finalText));
-                        player.sendMessage(ConfigLoader.message_name_set.replace("%s", FormatUtils.firstUppercase(finalText)));
+                        player.sendMessage(Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
+                                .matchLiteral("%name%").replacement(FormatUtils.firstUppercase(finalText)).build()));
+
                         return AnvilGUI.Response.close();
                     }
                 })
@@ -378,16 +403,16 @@ public class Inventories extends AbstractInventories {
                         InventoryManager inventoryManager = new InventoryManager();
                         if(!setup) {
                             customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
-                            player.sendMessage(ConfigLoader.message_modified_name);
+                            player.sendMessage(Lang.NAME_EDITED);
                             player.closeInventory();
                             return;
                         }
                         inventoryManager.openNextInventory(player, plugin, personUtil, this, postProcessCommands, customConfigsInit, setup);
                     }
                 })
-                .itemLeft(getCustomStack(plugin))
+                .itemLeft(getCustomStack())
                 .preventClose()
-                .title(FormatUtils.color(ConfigLoader.message_insert_name))
+                .title(Settings.ANVIL_GUI__TITLE)
                 .plugin(plugin);
     }
 
@@ -397,30 +422,30 @@ public class Inventories extends AbstractInventories {
 
 
     @Override
-    public void openGUI(InventoryType inventory, ConfigLoader.InventoryTypes type, Identity plugin, Player player, CustomConfigsInit customConfigsInit, PersonUtil personUtil, PostProcessCommands postProcessCommands, boolean setup) {
+    public void openGUI(InventoryType inventory, Settings.InventoryType type, Identity plugin, Player player, CustomConfigsInit customConfigsInit, PersonUtil personUtil, PostProcessCommands postProcessCommands, boolean setup) {
         switch (inventory) {
             case NAME:
-                if(type == ConfigLoader.InventoryTypes.ANVIL) {
+                if(type == Settings.InventoryType.ANVIL) {
                     this.getNameAnvilGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup).open(player);
                 }
 
-                if (type == ConfigLoader.InventoryTypes.CHEST) {
+                if (type == Settings.InventoryType.CHEST) {
                     this.getNameChestGUI(plugin, customConfigsInit, setup).show(player);
                 }
                 break;
 
             case GENDER:
-                if (type == ConfigLoader.InventoryTypes.CHEST) {
+                if (type == Settings.InventoryType.CHEST) {
                     this.getGenderChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup).show(player);
                 }
                 break;
 
             case AGE:
-                if (type == ConfigLoader.InventoryTypes.FURNACE) {
+                if (type == Settings.InventoryType.FURNACE) {
                     this.getAgeFurnaceGUI(player, plugin, customConfigsInit, personUtil, postProcessCommands, setup).show(player);
                 }
 
-                if(type == ConfigLoader.InventoryTypes.CHEST) {
+                if(type == Settings.InventoryType.CHEST) {
                     this.getAgeChestGUI(plugin, customConfigsInit, personUtil, postProcessCommands, setup).show(player);
                 }
                 break;

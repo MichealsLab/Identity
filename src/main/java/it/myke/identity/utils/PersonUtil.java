@@ -1,10 +1,10 @@
 package it.myke.identity.utils;
 
 import it.myke.identity.Identity;
+import it.myke.identity.disk.Lang;
 import it.myke.identity.inventories.Inventories;
 import it.myke.identity.inventories.InventoryManager;
 import it.myke.identity.obj.Person;
-import it.myke.identity.utils.config.ConfigLoader;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,12 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PersonUtil {
-    private final Map<UUID, Person> personHashMap;
-
-
-    public PersonUtil() {
-        this.personHashMap = new HashMap<>();
-    }
+    private final Map<UUID, Person> personHashMap = new HashMap<>();
 
 
     // It's a simple Map that stores the player's data.
@@ -73,9 +68,10 @@ public class PersonUtil {
         FileConfiguration data = customConfigsInit.getDataConfig();
         if(!data.isConfigurationSection("data." + player.getUniqueId())) {
             this.addPerson(player.getUniqueId(), 0, null, null);
+            System.out.println("Added " + player.getName() + " to the database.");
             new InventoryManager().openNextInventory(player, main, this, inventoryUtils, postProcessCommands, customConfigsInit, true);
         } else if(cmd) {
-            player.sendMessage(ConfigLoader.message_already_have_identity);
+            player.sendMessage(Lang.ALREADY_HAVE_IDENTITY);
         }
     }
 

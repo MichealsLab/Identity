@@ -1,10 +1,9 @@
 package it.myke.identity.listener;
 
 import it.myke.identity.Identity;
+import it.myke.identity.disk.Settings;
 import it.myke.identity.inventories.Inventories;
-import it.myke.identity.inventories.InventoryManager;
 import it.myke.identity.utils.PersonUtil;
-import it.myke.identity.utils.config.ConfigLoader;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import org.bukkit.Bukkit;
@@ -22,7 +21,7 @@ public class PlayerJoinEvent implements Listener {
     private Inventories inventoryUtils;
 
     public PlayerJoinEvent(Identity identity, PostProcessCommands postProcessCommands, Inventories inventoryUtils, PersonUtil personUtil, CustomConfigsInit customConfigsInit) {
-        if(!identity.getConfig().getBoolean("enabled.onJoinMenu")) return;
+        if(!Settings.ONJOIN_MENU_ENABLED) return;
         identity.getServer().getPluginManager().registerEvents(this, identity);
         this.main = identity;
         this.personUtil = personUtil;
@@ -38,12 +37,12 @@ public class PlayerJoinEvent implements Listener {
             Player player = event.getPlayer();
             personUtil.setup(player, customConfigsInit, main, postProcessCommands, inventoryUtils, false);
 
-            if (player.hasPermission("identity.showupdates") && !main.getConfig().getBoolean("updates.menu-shown")) {
+            if (player.hasPermission("identity.showupdates") && !Settings.UPDATES_SHOWN) {
                 if (!personUtil.isPerson(event.getPlayer().getUniqueId()))
                     inventories.get("update-" + main.getDescription().getVersion().replace(".", "-")).show(player);
             }
 
-        }, (ConfigLoader.menu_delay/1000)*20);
+        }, (Settings.MENU_SHOW_DELAY/1000)*20);
     }
 
 }

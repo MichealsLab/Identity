@@ -1,51 +1,54 @@
 #Please note: This feature is only valid for ChestGUIs!
 name:
+  title: "Name"
   filler: GRAY_STAINED_GLASS_PANE
   elements:
     13:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: '&a&lClick here to enter the name!'
+      name: '<green><bold>Click here to enter the name!'
       lore:
-        - '&7Do you already have any idea?'
+        - '<gray>Do you already have any idea?'
       action: ENTER_NAME
       texture: "b056bc1244fcff99344f12aba42ac23fee6ef6e3351d27d273c1572531f"
 gender:
+  title: "Gender"
   filler: GRAY_STAINED_GLASS_PANE
   elements:
     11:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: '&d&lFemale'
+      name: '<pink><bold>Female'
       lore:
-        - "&7Select gender &dFemale&7!"
+        - "<gray>Select gender <pink>Female<gray>!"
       action: FEMALE
       texture: "f6aac8c1c290be9d3bd495476aca42c68623b9cbefdd6ddbd6144855b9731c63"
     13:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: '&b&lMale'
+      name: '<blue><bold>Male'
       lore:
-        - "&7Select gender &bMale&7!"
+        - "<gray>Select gender <blue>Male<gray>!"
       action: MALE
       texture: "e7fe6e2316ca384e0c85261b14fc066e231d6127e540dfeddb8b54d911b82831"
     15:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: '&7&lNon-Binary'
+      name: '<gray><bold>Non-Binary'
       lore:
-        - "&7Select gender &7&lNon-Binary&7!"
+        - "<gray>Select gender <gray><bold>Non-Binary<gray>!"
       action: NONBINARY
       texture: "9b2ced4e56605abd2a608b6d71501678c60c5722604feaa72106769b0d3ac759"
 age:
+  title: "Age"
   filler: GRAY_STAINED_GLASS_PANE
   elements:
     12:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: "&a&lClick to add &7(+1)"
+      name: "<green><bold>Click to add <gray>(+1)"
       lore:
-        - "&7Click to add a year"
+        - "<gray>Click to add a year"
       action: ADD_AGE
       texture: "b056bc1244fcff99344f12aba42ac23fee6ef6e3351d27d273c1572531f"
     13:
@@ -53,42 +56,43 @@ age:
       custom-model-data: 10030
       name: "%actualage%"
       lore:
-        - "&7This is your age, click to confirm."
+        - "<gray>This is your age, click to confirm."
       action: CONFIRM_AGE
       texture: "a6f4431e983b3c854044bc00b7c54800243cd7dbf94de339b8c2f7b2566a5201"
     14:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: "&c&lClick to remove &7(-1)"
+      name: "<red><bold>Click to remove <gray>(-1)"
       lore:
-          - "&7Click to remove a year"
+          - "<gray>Click to remove a year"
       action: REMOVE_AGE
       texture: "4e4b8b8d2362c864e062301487d94d3272a6b570afbf80c2c5b148c954579d46"
 
 furnace:
   age:
+    title: "Age"
     elements:
       0:
         material: "CUSTOM_HEAD"
         custom-model-data: 10030
-        name: "&a&lClick to add &7(+1)"
+        name: "<green><bold>Click to add <gray>(+1)"
         lore:
-          - "&7Click to add a year"
+          - "<gray>Click to add a year"
         action: ADD_AGE
         texture: "b056bc1244fcff99344f12aba42ac23fee6ef6e3351d27d273c1572531f"
       1:
         material: "CUSTOM_HEAD"
         custom-model-data: 10030
-        name: "&c&lClick to remove &7(-1)"
+        name: "<red><bold>Click to remove <gray>(-1)"
         lore:
-          - "&7Click to remove a year"
+          - "<gray>Click to remove a year"
         action: REMOVE_AGE
         texture: "4e4b8b8d2362c864e062301487d94d3272a6b570afbf80c2c5b148c954579d46"
       2:
         material: "CUSTOM_HEAD"
         custom-model-data: 10030
-        name: "&a%actualage%"
+        name: "<green>%actualage%"
         lore:
-          - "&7This is your age, click to confirm."
+          - "<gray>This is your age, click to confirm."
         action: CONFIRM_AGE
         texture: "a6f4431e983b3c854044bc00b7c54800243cd7dbf94de339b8c2f7b2566a5201"

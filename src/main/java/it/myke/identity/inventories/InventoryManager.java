@@ -2,9 +2,10 @@ package it.myke.identity.inventories;
 
 import com.cryptomorin.xseries.XSound;
 import it.myke.identity.Identity;
+import it.myke.identity.disk.Lang;
+import it.myke.identity.disk.Settings;
 import it.myke.identity.obj.Person;
 import it.myke.identity.utils.PersonUtil;
-import it.myke.identity.utils.config.ConfigLoader;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.inventory.GenderCommands;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
@@ -17,11 +18,11 @@ public class InventoryManager {
     public String getNextInventory(Player player, PersonUtil personUtil) {
         if(personUtil.isPerson(player.getUniqueId())) {
             Person playerIdentity = personUtil.getPerson(player.getUniqueId());
-            if(playerIdentity.getName() == null && ConfigLoader.name) {
+            if(playerIdentity.getName() == null && Settings.NAME_ENABLED) {
                 return "name";
-            } else if(playerIdentity.getGender() == null && ConfigLoader.gender) {
+            } else if(playerIdentity.getGender() == null && Settings.GENDER_ENABLED) {
                 return "gender";
-            } else if(playerIdentity.getAge() == 0 && ConfigLoader.age) {
+            } else if(playerIdentity.getAge() == 0 && Settings.AGE_ENABLED) {
                 return "age";
             }
         }
@@ -39,7 +40,7 @@ public class InventoryManager {
         if (setup) {
             String nxtInventory = getNextInventory(player, personUtil);
             if (nxtInventory == null) {
-                player.sendMessage(ConfigLoader.message_stepCompleted);
+                player.sendMessage(Lang.SETUP_COMPLETED);
                 customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
                 String gender = personUtil.getPerson(player.getUniqueId()).getGender();
                 personUtil.removePerson(player.getUniqueId());
@@ -53,17 +54,9 @@ public class InventoryManager {
             } else {
                 player.closeInventory();
                 switch (nxtInventory) {
-                    case "name":
-                        inventories.openGUI(InventoryType.NAME, ConfigLoader.invName_Type, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
-                        break;
-
-                    case "gender":
-                        inventories.openGUI(InventoryType.GENDER, ConfigLoader.InventoryTypes.CHEST, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
-                        break;
-
-                    case "age":
-                        inventories.openGUI(InventoryType.AGE, ConfigLoader.invAge_Type, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
-                        break;
+                    case "name" -> inventories.openGUI(InventoryType.NAME, Settings.INVENTORY_NAME_TYPE, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
+                    case "gender" -> inventories.openGUI(InventoryType.GENDER, Settings.InventoryType.CHEST, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
+                    case "age" -> inventories.openGUI(InventoryType.AGE, Settings.INVENTORY_AGE_TYPE, plugin, player, customConfigsInit, personUtil, postProcessCommands, setup);
                 }
 
                 XSound.play(player, "BLOCK_NOTE_BLOCK_PLING");

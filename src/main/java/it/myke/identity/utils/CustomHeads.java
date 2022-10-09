@@ -3,6 +3,7 @@ package it.myke.identity.utils;
 import com.cryptomorin.xseries.XMaterial;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -16,7 +17,7 @@ public class CustomHeads {
 
 
 
-    public static ItemStack getCustomHead(final String val, final String name, final List<String> lore) {
+    public static ItemStack getCustomHead(final String val, final Component name, final List<Component> lore) {
         final ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
         if (!val.isEmpty()) {
             final SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
@@ -29,8 +30,8 @@ public class CustomHeads {
             } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ex3) {
                 ex3.printStackTrace();
             }
-            skullMeta.setDisplayName(name);
-            skullMeta.setLore(lore);
+            skullMeta.displayName(name);
+            skullMeta.lore(lore);
             head.setItemMeta(skullMeta);
         }
         return head;

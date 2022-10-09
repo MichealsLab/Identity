@@ -1,9 +1,10 @@
 package it.myke.identity.papi;
 
 import it.myke.identity.Identity;
-import it.myke.identity.utils.FormatUtils;
-import it.myke.identity.utils.config.ConfigLoader;
+import it.myke.identity.disk.Lang;
+import it.myke.identity.disk.Settings;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -72,16 +73,16 @@ public class CustomNamesExpansion extends PlaceholderExpansion {
                     }
                 case "gender":
                     String gender = (data.getString("data." + player.getUniqueId() + ".gender") + "").toLowerCase(Locale.ROOT);
-                    if(gender.equals(ConfigLoader.message_non_binary)) {
-                        return FormatUtils.color(plugin.getConfig().getString("placeholders.non-binary"));
+                    if(gender.equals(Lang.NON_BINARY_GENDER)) {
+                        return LegacyComponentSerializer.legacySection().serialize(Settings.PLACEHOLDERS__NONBINARY);
                     }
 
-                    if(gender.equals(ConfigLoader.message_male)) {
-                        return FormatUtils.color(plugin.getConfig().getString("placeholders.male"));
+                    if(gender.equals(Lang.MALE_GENDER)) {
+                        return LegacyComponentSerializer.legacySection().serialize(Settings.PLACEHOLDERS__MALE);
                     }
 
-                    if(gender.equals(ConfigLoader.message_female)) {
-                        return FormatUtils.color(plugin.getConfig().getString("placeholders.female"));
+                    if(gender.equals(Lang.FEMALE_GENDER)) {
+                        return LegacyComponentSerializer.legacySection().serialize(Settings.PLACEHOLDERS__FEMALE);
                     }
                 case "age":
                     int age = data.getInt("data." + player.getUniqueId() + ".age");

@@ -50,6 +50,10 @@ public class CustomConfigsInit {
         return configs.get("lang.yml");
     }
 
+    public FileConfiguration getSettingsConfig() {
+        return configs.get("settings.yml");
+    }
+
 
     public FileConfiguration getDataConfig() {
         return configs.get("data.yml");

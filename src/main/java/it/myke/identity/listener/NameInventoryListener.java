@@ -1,13 +1,12 @@
 package it.myke.identity.listener;
 
 import it.myke.identity.Identity;
+import it.myke.identity.disk.Lang;
+import it.myke.identity.disk.Settings;
 import it.myke.identity.inventories.Inventories;
-import it.myke.identity.inventories.InventoryType;
 import it.myke.identity.inventories.InventoryManager;
 import it.myke.identity.utils.FormatUtils;
-import it.myke.identity.utils.GUIHolder;
 import it.myke.identity.utils.PersonUtil;
-import it.myke.identity.utils.config.ConfigLoader;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import org.bukkit.Bukkit;
@@ -54,12 +53,29 @@ public class NameInventoryListener implements Listener {
         if(processStarted.containsKey(event.getPlayer().getUniqueId())) {
             String name;
             boolean setup = processStarted.get(event.getPlayer().getUniqueId());
-            if(ConfigLoader.invName_onlyName) {
+            if(!Settings.LASTNAME_REQUIRED) {
                 name = event.getMessage().replace(" ", "");
+
+                if(name.length() < Settings.FIRSTNAME_MIN_LENGTH) {
+                    event.getPlayer().sendMessage(Lang.NAME_TOO_SHORT);
+                    return;
+                }
+
+                if(name.length() > Settings.FIRSTNAME_MAX_LENGTH) {
+                    event.getPlayer().sendMessage(Lang.FIRSTNAME_EXCEEDS_MAX_LENGTH);
+                    return;
+                }
+
+                if(Settings.ALPHANUMERIC_ONLY && !FormatUtils.isAlphanumeric(name)) {
+                    event.getPlayer().sendMessage(Lang.NAME_NOT_VALID);
+                    return;
+                }
+
+
                 addName(event.getPlayer(), FormatUtils.firstUppercase(name));
                 if(!setup) {
                     customConfigsInit.saveInConfig(event.getPlayer().getUniqueId(), personUtil);
-                    event.getPlayer().sendMessage(ConfigLoader.message_modified_name);
+                    event.getPlayer().sendMessage(Lang.NAME_EDITED);
                     event.getPlayer().closeInventory();
                     return;
                 }
@@ -69,10 +85,37 @@ public class NameInventoryListener implements Listener {
             } else {
                 if(event.getMessage().split(" ").length == 2) {
                     String[] surname_and_name = event.getMessage().split(" ");
+
+                    if(surname_and_name[0].length() < Settings.FIRSTNAME_MIN_LENGTH) {
+                        event.getPlayer().sendMessage(Lang.NAME_TOO_SHORT);
+                        return;
+                    }
+
+                    if(surname_and_name[0].length() > Settings.FIRSTNAME_MAX_LENGTH) {
+                        event.getPlayer().sendMessage(Lang.FIRSTNAME_EXCEEDS_MAX_LENGTH);
+                        return;
+                    }
+
+                    if(surname_and_name[1].length() < Settings.LASTNAME_MIN_LENGTH) {
+                        event.getPlayer().sendMessage(Lang.NAME_TOO_SHORT);
+                        return;
+                    }
+
+                    if(surname_and_name[1].length() > Settings.LASTNAME_MAX_LENGTH) {
+                        event.getPlayer().sendMessage(Lang.LASTNAME_EXCEEDS_MAX_LENGTH);
+                        return;
+                    }
+
+                    if(!FormatUtils.isAlphanumeric(surname_and_name[0] + surname_and_name[1])) {
+                        event.getPlayer().sendMessage(Lang.NAME_NOT_VALID);
+                        return;
+                    }
+
+
                     addName(event.getPlayer(), FormatUtils.firstUppercase(surname_and_name[0]) + " " + FormatUtils.firstUppercase(surname_and_name[1]));
                     if(!setup) {
                         customConfigsInit.saveInConfig(event.getPlayer().getUniqueId(), personUtil);
-                        event.getPlayer().sendMessage(ConfigLoader.message_modified_name);
+                        event.getPlayer().sendMessage(Lang.NAME_EDITED);
                         event.getPlayer().closeInventory();
                         return;
                     }
@@ -80,7 +123,7 @@ public class NameInventoryListener implements Listener {
                     Bukkit.getScheduler().runTask(main, () -> new InventoryManager().openNextInventory(event.getPlayer(), main, personUtil, inventoriesUtil, postProcessCommands, customConfigsInit, setup));
                     processStarted.remove(event.getPlayer().getUniqueId());
                 } else {
-                    event.getPlayer().sendMessage(ConfigLoader.message_surname_needed);
+                    event.getPlayer().sendMessage(Lang.LASTNAME_REQUIRED);
                 }
             }
             event.setCancelled(true);
