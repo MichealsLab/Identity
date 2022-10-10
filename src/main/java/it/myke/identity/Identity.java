@@ -31,9 +31,11 @@ import java.util.concurrent.TimeUnit;
 
 public final class Identity extends JavaPlugin {
 
+
     @Getter private CustomConfigsInit customConfigsInit;
     @Getter private GUIHolder ageHolder,nameHolder,genderHolder;
     private PostProcessCommands postProcessCommands;
+    private PersonUtil personUtil;
 
 
 
@@ -60,7 +62,7 @@ public final class Identity extends JavaPlugin {
 
         Bukkit.getLogger().info("========== Identity ==========");
 
-        PersonUtil personUtil = new PersonUtil();
+        this.personUtil = new PersonUtil();
 
         postProcessCommands = new PostProcessCommands();
         postProcessCommands.init(this);
@@ -104,7 +106,7 @@ public final class Identity extends JavaPlugin {
      * @return An instance of the APIManager class.
      */
     public APIManager getAPI() {
-        return new APIManager(customConfigsInit);
+        return new APIManager(customConfigsInit, personUtil);
     }
 
     private void setupCommandManager(PersonUtil personUtil, Inventories inventoriesUtil) {
