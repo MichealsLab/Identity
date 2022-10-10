@@ -94,7 +94,7 @@ public class CustomConfigsInit {
         Person person = personUtil.getPerson(uuid);
         if(person.getName() != null) data.set("data." + uuid.toString() + ".name", person.getName());
         if(person.getGender() != null) data.set("data." + uuid.toString() + ".gender", person.getGender());
-        if(person.getAge() != 0) data.set("data." + uuid.toString() + ".age", person.getAge());
+        if(person.getAge() != -1) data.set("data." + uuid.toString() + ".age", person.getAge());
         reload("data.yml");
     }
 

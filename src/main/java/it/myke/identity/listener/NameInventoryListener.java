@@ -51,6 +51,8 @@ public class NameInventoryListener implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         if(processStarted.containsKey(event.getPlayer().getUniqueId())) {
+            personUtil.addPerson(event.getPlayer().getUniqueId(), -1, null, null );
+            event.setCancelled(true);
             String name;
             boolean setup = processStarted.get(event.getPlayer().getUniqueId());
             if(!Settings.LASTNAME_REQUIRED) {
@@ -72,13 +74,13 @@ public class NameInventoryListener implements Listener {
                 }
 
 
-                addName(event.getPlayer(), FormatUtils.firstUppercase(name));
                 if(!setup) {
                     customConfigsInit.saveInConfig(event.getPlayer().getUniqueId(), personUtil);
                     event.getPlayer().sendMessage(Lang.NAME_EDITED);
-                    event.getPlayer().closeInventory();
+                    Bukkit.getScheduler().runTask(main, () -> event.getPlayer().closeInventory());
                     return;
                 }
+                addName(event.getPlayer(), FormatUtils.firstUppercase(name));
                 //Opening nextInventory
                 Bukkit.getScheduler().runTask(main, () -> new InventoryManager().openNextInventory(event.getPlayer(), main, personUtil, inventoriesUtil, postProcessCommands, customConfigsInit, setup));
                 processStarted.remove(event.getPlayer().getUniqueId());
@@ -106,19 +108,19 @@ public class NameInventoryListener implements Listener {
                         return;
                     }
 
-                    if(!FormatUtils.isAlphanumeric(surname_and_name[0] + surname_and_name[1])) {
+                    if(Settings.ALPHANUMERIC_ONLY && !FormatUtils.isAlphanumeric(surname_and_name[0] + surname_and_name[1])) {
                         event.getPlayer().sendMessage(Lang.NAME_NOT_VALID);
                         return;
                     }
 
-
-                    addName(event.getPlayer(), FormatUtils.firstUppercase(surname_and_name[0]) + " " + FormatUtils.firstUppercase(surname_and_name[1]));
                     if(!setup) {
                         customConfigsInit.saveInConfig(event.getPlayer().getUniqueId(), personUtil);
                         event.getPlayer().sendMessage(Lang.NAME_EDITED);
+                        Bukkit.getScheduler().runTask(main, () -> event.getPlayer().closeInventory());
                         event.getPlayer().closeInventory();
                         return;
                     }
+                    addName(event.getPlayer(), FormatUtils.firstUppercase(surname_and_name[0]) + " " + FormatUtils.firstUppercase(surname_and_name[1]));
                     //Opening nextInventory
                     Bukkit.getScheduler().runTask(main, () -> new InventoryManager().openNextInventory(event.getPlayer(), main, personUtil, inventoriesUtil, postProcessCommands, customConfigsInit, setup));
                     processStarted.remove(event.getPlayer().getUniqueId());
@@ -126,7 +128,6 @@ public class NameInventoryListener implements Listener {
                     event.getPlayer().sendMessage(Lang.LASTNAME_REQUIRED);
                 }
             }
-            event.setCancelled(true);
 
         }
     }

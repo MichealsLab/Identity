@@ -190,7 +190,7 @@ public class CommandListener {
         }
 
         PersonUtil personUtil = new PersonUtil();
-        personUtil.addPerson(((Player) sender).getUniqueId(), 0, null, null);
+        personUtil.addPerson(((Player) sender).getUniqueId(), -1, null, null);
         inventoriesUtil.openGUI(InventoryType.GENDER, Settings.InventoryType.CHEST, main, ((Player) sender).getPlayer(), customConfigsInit, personUtil, postProcessCommands, false);
 
     }
@@ -208,7 +208,7 @@ public class CommandListener {
         }
 
         PersonUtil personUtil = new PersonUtil();
-        personUtil.addPerson(((Player) sender).getUniqueId(), 0, null, null);
+        personUtil.addPerson(((Player) sender).getUniqueId(), -1, null, null);
         inventoriesUtil.openGUI(InventoryType.AGE, Settings.INVENTORY_AGE_TYPE, main, ((Player) sender).getPlayer(), customConfigsInit, personUtil, postProcessCommands, false);
 
     }
@@ -226,7 +226,7 @@ public class CommandListener {
         }
 
         PersonUtil personUtil = new PersonUtil();
-        personUtil.addPerson(((Player) sender).getUniqueId(), 0, null, null);
+        personUtil.addPerson(((Player) sender).getUniqueId(), -1, null, null);
         inventoriesUtil.openGUI(InventoryType.NAME, Settings.INVENTORY_NAME_TYPE, main, ((Player) sender).getPlayer(), customConfigsInit, personUtil, postProcessCommands, false);
     }
 

@@ -2,6 +2,7 @@
 name:
   title: "Name"
   filler: GRAY_STAINED_GLASS_PANE
+  filler-data: 10000
   elements:
     13:
       material: "CUSTOM_HEAD"
@@ -14,13 +15,14 @@ name:
 gender:
   title: "Gender"
   filler: GRAY_STAINED_GLASS_PANE
+  filler-data: 10000
   elements:
     11:
       material: "CUSTOM_HEAD"
       custom-model-data: 10030
-      name: '<pink><bold>Female'
+      name: '<color:#FC00FF><bold>Female'
       lore:
-        - "<gray>Select gender <pink>Female<gray>!"
+        - "<gray>Select gender <color:#FC00FF>Female<gray>!"
       action: FEMALE
       texture: "f6aac8c1c290be9d3bd495476aca42c68623b9cbefdd6ddbd6144855b9731c63"
     13:
@@ -42,6 +44,7 @@ gender:
 age:
   title: "Age"
   filler: GRAY_STAINED_GLASS_PANE
+  filler-data: 10000
   elements:
     12:
       material: "CUSTOM_HEAD"

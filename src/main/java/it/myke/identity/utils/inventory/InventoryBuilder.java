@@ -31,11 +31,13 @@ public class InventoryBuilder {
             Action action = getActionOrDefault(elementSection);
             int intPosition = Integer.parseInt(elementSection.getName());
             char position = translate(Integer.parseInt(elementSection.getName()));
-            elements.add(new ActionElement(intPosition ,position, action, parseStack(elementSection), MiniMessage.miniMessage().deserialize(elementSection.getString("name")), Settings.translate(elementSection.getStringList("lore"))));
+            elements.add(new ActionElement(intPosition, position, action, parseStack(elementSection), MiniMessage.miniMessage().deserialize(elementSection.getString("name")).decoration(TextDecoration.ITALIC, false), Settings.translate(elementSection.getStringList("lore"))));
         }
         String fillerPath = customConfigsInit.getInventoriesConfig().getString(inventory + ".filler");
         if(fillerPath != null) {
-            filler = XMaterial.matchXMaterial(fillerPath).get().parseItem();
+            ItemStack filler = XMaterial.matchXMaterial(fillerPath).get().parseItem();
+            filler.editMeta(meta -> meta.setCustomModelData(customConfigsInit.getInventoriesConfig().getInt(inventory + ".filler-data")));
+            this.filler = filler;
         }
         return this;
     }

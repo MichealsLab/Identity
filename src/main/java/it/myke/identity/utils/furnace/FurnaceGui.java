@@ -146,7 +146,7 @@ public class FurnaceGui implements Listener {
 
     private ItemStack edit(ItemStack itemStack, int customModelData, Component displayName, List<Component> lore) {
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.displayName(displayName.replaceText(TextReplacementConfig.builder().matchLiteral("%actualage%").replacement(String.valueOf(actualAge)).build()));
+        itemMeta.displayName(displayName.replaceText(TextReplacementConfig.builder().matchLiteral("%actualage%").replacement(String.valueOf(actualAge)).build()).decoration(TextDecoration.ITALIC, false));
         if(lore != null) {
             List<Component> finalLore = new ArrayList<>();
             for(Component line : lore) {

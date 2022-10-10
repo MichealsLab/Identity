@@ -35,7 +35,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -115,7 +114,7 @@ public class Inventories extends AbstractInventories {
             Title title = Title.title(
                     Lang.INSERT_NAME_TITLE,
                     Lang.INSERT_NAME_SUBTITLE,
-                    Title.Times.of(Duration.ofMillis(1), Duration.ofMillis(70), Duration.ofMillis(1))
+                    Title.Times.of(Duration.ofMillis(1), Duration.ofSeconds(5), Duration.ofMillis(1))
             );
             player.showTitle(title);
         }

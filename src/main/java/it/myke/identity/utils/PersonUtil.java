@@ -67,8 +67,7 @@ public class PersonUtil {
     public void setup(Player player, CustomConfigsInit customConfigsInit, Identity main, PostProcessCommands postProcessCommands, Inventories inventoryUtils, boolean cmd) {
         FileConfiguration data = customConfigsInit.getDataConfig();
         if(!data.isConfigurationSection("data." + player.getUniqueId())) {
-            this.addPerson(player.getUniqueId(), 0, null, null);
-            System.out.println("Added " + player.getName() + " to the database.");
+            this.addPerson(player.getUniqueId(), -1, null, null);
             new InventoryManager().openNextInventory(player, main, this, inventoryUtils, postProcessCommands, customConfigsInit, true);
         } else if(cmd) {
             player.sendMessage(Lang.ALREADY_HAVE_IDENTITY);

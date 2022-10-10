@@ -22,7 +22,7 @@ public class InventoryManager {
                 return "name";
             } else if(playerIdentity.getGender() == null && Settings.GENDER_ENABLED) {
                 return "gender";
-            } else if(playerIdentity.getAge() == 0 && Settings.AGE_ENABLED) {
+            } else if(playerIdentity.getAge() == -1 && Settings.AGE_ENABLED) {
                 return "age";
             }
         }
