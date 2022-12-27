@@ -15,8 +15,10 @@ import it.myke.identity.papi.CustomNamesExpansion;
 import it.myke.identity.utils.GUIHolder;
 import it.myke.identity.utils.PersonUtil;
 import it.myke.identity.utils.config.CustomConfigsInit;
+import it.myke.identity.utils.furnace.FurnaceManager;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import lombok.Getter;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -37,10 +39,15 @@ public final class Identity extends JavaPlugin {
     private PostProcessCommands postProcessCommands;
     private PersonUtil personUtil;
 
+    public static net.kyori.adventure.platform.bukkit.BukkitAudiences audience;
+
 
 
     @Override
     public void onEnable() {
+
+        audience = BukkitAudiences.create(this);
+
         this.customConfigsInit = new CustomConfigsInit();
         customConfigsInit.init(this);
 
@@ -52,9 +59,8 @@ public final class Identity extends JavaPlugin {
         new Settings(customConfigsInit.getSettingsConfig()).init();
         new Lang(customConfigsInit.getLangConfig()).init();
 
-
         //Add PlaceHolderApi support
-        if(Bukkit.getPluginManager().isPluginEnabled("PlaceHolderAPI")) {
+        if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             this.getLogger().info("PlaceholderAPI plugin detected. You can use our Expansion! (Name: identity)");
             this.getLogger().warning("Server reloads could break the Placeholders System! Restart only.");
             new CustomNamesExpansion(this).register();
@@ -124,6 +130,7 @@ public final class Identity extends JavaPlugin {
     private void loadListeners(PersonUtil personUtil, Inventories inventoriesUtil) {
         new PlayerJoinEvent(this, postProcessCommands, inventoriesUtil, personUtil, customConfigsInit);
         new PlayerQuitListener(this, personUtil);
+        new FurnaceManager(this, personUtil);
 
         if (Settings.NAME_ENABLED) {
             new NameInventoryListener(this, inventoriesUtil, personUtil, postProcessCommands, customConfigsInit);

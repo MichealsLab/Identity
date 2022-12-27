@@ -61,11 +61,11 @@ public class Lang {
             try {
                 String fieldName = field.getName().replace("_", "-").toLowerCase();
                 if (field.getType() == Component.class) {
-                    field.set(this, MiniMessage.miniMessage().deserialize(config.getString(fieldName)));
+                    field.set(field, MiniMessage.miniMessage().deserialize(config.getString(fieldName)));
                 }
 
                 if (field.getType() == String.class) {
-                    field.set(this, config.getString(fieldName));
+                    field.set(field, config.getString(fieldName));
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

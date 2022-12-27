@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static it.myke.identity.Identity.audience;
+
 public class PersonUtil {
     private final Map<UUID, Person> personHashMap = new HashMap<>();
 
@@ -64,14 +66,17 @@ public class PersonUtil {
         }
     }
 
-    public void setup(Player player, CustomConfigsInit customConfigsInit, Identity main, PostProcessCommands postProcessCommands, Inventories inventoryUtils, boolean cmd) {
+    public boolean setup(Player player, CustomConfigsInit customConfigsInit, Identity main, PostProcessCommands postProcessCommands, Inventories inventoryUtils, boolean cmd) {
         FileConfiguration data = customConfigsInit.getDataConfig();
         if(!data.isConfigurationSection("data." + player.getUniqueId())) {
             this.addPerson(player.getUniqueId(), -1, null, null);
             new InventoryManager().openNextInventory(player, main, this, inventoryUtils, postProcessCommands, customConfigsInit, true);
+            return true;
         } else if(cmd) {
-            player.sendMessage(Lang.ALREADY_HAVE_IDENTITY);
+            audience.player(player).sendMessage(Lang.ALREADY_HAVE_IDENTITY);
+            return false;
         }
+        return false;
     }
 
 

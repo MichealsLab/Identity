@@ -7,7 +7,6 @@ import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
 import it.myke.identity.Identity;
 import it.myke.identity.utils.CustomHeads;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -17,9 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static it.myke.identity.Identity.audience;
 import static it.myke.identity.inventories.Inventories.inventories;
-import static it.myke.identity.update.UpdateType.FEATURE;
-import static it.myke.identity.update.UpdateType.IMPORTANT;
 
 public class UpdateShower {
     private final String bugfix_headValue = "ff9d9de62ecae9b798555fd23e8ca35e2605291939c1862fe79066698c9508a7";
@@ -75,7 +73,7 @@ public class UpdateShower {
             if(!identity.getConfig().getBoolean("updates.menu-shown")) {
                 identity.getConfig().set("updates.menu-shown", true);
                 identity.saveConfig();
-                close.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize("<color:#17C600>Thank you for using Identity! Next Updates will be shown to you only if you want it by command, <gray>/identity showupdates<color:#17C600>."));
+                audience.sender(close.getPlayer()).sendMessage(MiniMessage.miniMessage().deserialize("<color:#17C600>Thank you for using Identity! Next Updates will be shown to you only if you want it by command, <gray>/identity showupdates<color:#17C600>."));
             }
             return true;
         });

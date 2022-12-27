@@ -35,7 +35,7 @@ public class PlayerJoinEvent implements Listener {
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
         Bukkit.getScheduler().runTaskLater(main, bukkitTask -> {
             Player player = event.getPlayer();
-            personUtil.setup(player, customConfigsInit, main, postProcessCommands, inventoryUtils, false);
+            if(personUtil.setup(player, customConfigsInit, main, postProcessCommands, inventoryUtils, false)) return;
 
             if (player.hasPermission("identity.showupdates") && !Settings.UPDATES_SHOWN) {
                 if (!personUtil.isPerson(event.getPlayer().getUniqueId()))

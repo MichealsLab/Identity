@@ -9,7 +9,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.checkerframework.checker.units.qual.A;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -124,6 +123,7 @@ public class Settings {
         }
         return components;
     }
+
 
     public enum InventoryType {
         CHEST,

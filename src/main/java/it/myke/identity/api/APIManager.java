@@ -1,8 +1,8 @@
 package it.myke.identity.api;
 
+import it.myke.identity.obj.Person;
 import it.myke.identity.utils.PersonUtil;
 import it.myke.identity.utils.config.CustomConfigsInit;
-import it.myke.identity.obj.Person;
 import lombok.AllArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -107,23 +107,60 @@ public class APIManager extends APIMethods {
 
 abstract class APIMethods {
 
+    /**
+     * If the player's data exists, return a new Person object with the player's name
+     * @param playerName
+     * @return
+     */
     public abstract Person getUserIdentity(String playerName);
 
+    /**
+     * If the player's data exists, return a new Person object with the player's uuid
+     * @param playerUUID
+     * @return
+     */
     @Deprecated
     public abstract Person getUserIdentity(UUID playerUUID);
 
+    /**
+     * @param playerUUID
+     * @param gender
+     */
     public abstract void setGender(UUID playerUUID, String gender);
 
+    /**
+     *
+     * @param playerUUID
+     * @param name
+     */
     public abstract void setName(UUID playerUUID, String name);
 
+    /**
+     * Set the age of a player.
+     *
+     * @param playerUUID The UUID of the player you want to set the age of.
+     * @param age The age you want to set.
+     */
     public abstract void setAge(UUID playerUUID, int age);
 
+    /**
+     * @deprecated Use {@link #setGender(UUID, String)} instead.
+     */
     @Deprecated
     public abstract void setGender(String name, String gender);
 
+    /**
+     * @param player The Username of the player you want to set the name of.
+     * @param name The name you want to set.
+     */
     @Deprecated
     public abstract void setName(String player, String name);
 
+    /**
+     * @param name The name of the player you want to set the age of.
+     * @param age The age you want to set the player to.
+     */
     @Deprecated
     public abstract void setAge(String name, int age);
 }
+

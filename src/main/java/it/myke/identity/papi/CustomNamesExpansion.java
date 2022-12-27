@@ -34,7 +34,7 @@ public class CustomNamesExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return "1.3.5";
+        return "1.3.6";
     }
 
     @Override

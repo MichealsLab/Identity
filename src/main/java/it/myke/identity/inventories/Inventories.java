@@ -14,10 +14,13 @@ import it.myke.identity.obj.Person;
 import it.myke.identity.update.UpdateReader;
 import it.myke.identity.update.UpdateShower;
 import it.myke.identity.utils.FormatUtils;
+import it.myke.identity.utils.Legacy;
 import it.myke.identity.utils.PersonUtil;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.furnace.FurnaceElement;
 import it.myke.identity.utils.furnace.FurnaceGui;
+import it.myke.identity.utils.furnace.FurnaceManager;
+import it.myke.identity.utils.furnace.TaskObject;
 import it.myke.identity.utils.inventory.Action;
 import it.myke.identity.utils.inventory.ActionElement;
 import it.myke.identity.utils.inventory.InventoryBuilder;
@@ -38,6 +41,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static it.myke.identity.Identity.audience;
+import static it.myke.identity.utils.furnace.FurnaceManager.*;
 
 public class Inventories extends AbstractInventories {
     public static HashMap<String, InventoryGui> inventories;
@@ -96,8 +102,8 @@ public class Inventories extends AbstractInventories {
     public static ItemStack getCustomStack() {
         ItemStack stack = XMaterial.matchXMaterial(Settings.ANVIL_GUI__ITEM__MATERIAL).parseItem();
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(Settings.ANVIL_GUI__ITEM__DISPLAY_NAME.decoration(TextDecoration.ITALIC, false));
-        meta.lore(Settings.ANVIL_GUI__ITEM__LORE);
+        meta.setDisplayName(Legacy.translate(Settings.ANVIL_GUI__ITEM__DISPLAY_NAME.decoration(TextDecoration.ITALIC, false)));
+        meta.setLore(Legacy.translate(Settings.ANVIL_GUI__ITEM__LORE));
         meta.setCustomModelData(Settings.ANVIL_GUI__ITEM__CUSTOM_MODEL_DATA);
         stack.setItemMeta(meta);
         return stack;
@@ -109,14 +115,14 @@ public class Inventories extends AbstractInventories {
     private boolean getNameListener(Player player, InventoryGui inventoryGui, boolean setup) {
         processStarted.put(player.getUniqueId(), setup);
         inventoryGui.close();
-        player.sendMessage(Lang.INSERT_NAME);
+        audience.player(player).sendMessage(Lang.INSERT_NAME);
         if(Settings.NAME_TITLEBAR_ENABLED) {
             Title title = Title.title(
                     Lang.INSERT_NAME_TITLE,
                     Lang.INSERT_NAME_SUBTITLE,
-                    Title.Times.of(Duration.ofMillis(1), Duration.ofSeconds(5), Duration.ofMillis(1))
+                    Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
             );
-            player.showTitle(title);
+            audience.player(player).showTitle(title);
         }
         return true;
     }
@@ -181,11 +187,11 @@ public class Inventories extends AbstractInventories {
                 if(table.containsRow(actionElement.getAction())) {
                     Table.Cell<Action, String, Component> genderCell = table.cellSet().stream().filter(cell -> cell.getRowKey() == actionElement.getAction()).findFirst().get();
                     personUtil.getPerson(click.getWhoClicked().getUniqueId()).setGender(genderCell.getColumnKey());
-                    click.getWhoClicked().sendMessage(genderCell.getValue());
+                    audience.player((Player) click.getWhoClicked()).sendMessage (genderCell.getValue());
                 }
                 if (!setup) {
                     customConfigsInit.saveInConfig(click.getWhoClicked().getUniqueId(), personUtil);
-                    click.getWhoClicked().sendMessage(Lang.GENDER_EDITED);
+                    audience.player((Player) click.getWhoClicked()).sendMessage (Lang.GENDER_EDITED);
                     click.getWhoClicked().closeInventory();
                     return true;
                 }
@@ -231,11 +237,11 @@ public class Inventories extends AbstractInventories {
             if (actionElement.getAction() == Action.CONFIRM_AGE) {
                 inventoryGui.addElement(new DynamicGuiElement(actionElement.getCharPos(), (viewer) -> new StaticGuiElement(actionElement.getCharPos(), actionElement.getStack(), click -> {
                     personUtil.getPerson(click.getWhoClicked().getUniqueId()).setAge(actualAge.get());
-                    click.getWhoClicked().sendMessage(Lang.AGE_CONFIRMED);
+                    audience.player((Player) click.getWhoClicked()).sendMessage (Lang.AGE_CONFIRMED);
                     new InventoryManager().openNextInventory((Player) click.getWhoClicked(), plugin, personUtil, this, postProcessCommands, customConfigsInit, setup);
                     if(!setup) {
                         customConfigsInit.saveInConfig(click.getWhoClicked().getUniqueId(), personUtil);
-                        click.getWhoClicked().sendMessage(Lang.AGE_EDITED);
+                        audience.player((Player) click.getWhoClicked()).sendMessage (Lang.AGE_EDITED);
                         click.getWhoClicked().closeInventory();
                     }
                     return true;
@@ -250,7 +256,7 @@ public class Inventories extends AbstractInventories {
                             if (!(actualAge.get() - 1 < minAge)) {
                                 actualAge.getAndDecrement();
                             } else {
-                                click.getWhoClicked().sendActionBar(Lang.MIN_AGE_REACHED);
+                                audience.player((Player) click.getWhoClicked()).sendActionBar(Lang.MIN_AGE_REACHED);
                                 XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                             }
                             click.getGui().draw();
@@ -259,7 +265,7 @@ public class Inventories extends AbstractInventories {
                             if (!(actualAge.get() + 1 > maxAge)) {
                                 actualAge.getAndIncrement();
                             } else {
-                                click.getWhoClicked().sendActionBar(Lang.MAX_AGE_REACHED);
+                                audience.player((Player) click.getWhoClicked()).sendActionBar(Lang.MAX_AGE_REACHED);
                                 XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                             }
                             click.getGui().draw();
@@ -296,62 +302,74 @@ public class Inventories extends AbstractInventories {
         AtomicInteger actualAge = new AtomicInteger(minAge);
 
         InventoryBuilder inventoryBuilder = new InventoryBuilder().getBuilder(customConfigsInit, "furnace.age");
-        FurnaceGui furnaceGui = new FurnaceGui(inventoryBuilder.getTitle(), plugin, personUtil);
+        FurnaceGui furnaceGui = new FurnaceGui(inventoryBuilder.getTitle(), plugin);
+        FurnaceManager.personUtil = personUtil;
+
+        FurnaceManager.addFurnace(player.getUniqueId(), furnaceGui); //!important
 
         for(ActionElement element : inventoryBuilder.getElements()) {
             switch (element.getAction()) {
-                case REMOVE_AGE -> furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
+                case REMOVE_AGE -> furnaceGui.addElement(new FurnaceElement(element.getDisplayname(), element.getLore(), element.getIntPos(), click -> {
                     long now = System.currentTimeMillis();
                     long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
                     if (now >= coolDownEnd) {
                         if (actualAge.get() - 1 >= minAge) {
                             actualAge.getAndDecrement();
-                            furnaceGui.setActualAge(actualAge.get());
+
+                            TaskObject taskObject = FurnaceManager.taskMap.getOrDefault(furnaceGui, TaskObject.defaultObject());
+                            taskObject.setAge(actualAge.get());
+                            FurnaceManager.taskMap.put(furnaceGui, taskObject);
 
                             now = System.currentTimeMillis();
                             long cooldownMs = 200;
                             cooldown.put(player.getUniqueId(), now + cooldownMs);
                         } else {
-                            click.getWhoClicked().sendActionBar(Lang.MIN_AGE_REACHED);
+                            audience.player((Player) click.getWhoClicked()).sendActionBar(Lang.MIN_AGE_REACHED);
                             XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                         }
                     }
-                }, element.getDisplayname(),
-                        element.getLore()));
-                case ADD_AGE -> furnaceGui.addElement(new FurnaceElement(element.getIntPos(), false, -1, element.getStack(), click -> {
+                }, element.getStack(), false, -1));
+
+                case ADD_AGE -> furnaceGui.addElement(new FurnaceElement(element.getDisplayname(), element.getLore(), element.getIntPos(), click -> {
                     long now = System.currentTimeMillis();
                     long coolDownEnd = cooldown.getOrDefault(player.getUniqueId(), now);
                     if (now >= coolDownEnd) {
                         if (actualAge.get() + 1 <= maxAge) {
                             actualAge.getAndIncrement();
-                            furnaceGui.setActualAge(actualAge.get());
+                            FurnaceManager.taskMap.get(furnaceGui).setAge(actualAge.get());
 
                             now = System.currentTimeMillis();
                             long cooldownMs = 200;
                             cooldown.put(player.getUniqueId(), now + cooldownMs);
                         } else {
-                            click.getWhoClicked().sendActionBar(Lang.MAX_AGE_REACHED);
+                            audience.player((Player) click.getWhoClicked()).sendActionBar(Lang.MAX_AGE_REACHED);
                             XSound.play((Player) click.getWhoClicked(), "BLOCK_ANVIL_USE");
                         }
                     }
-                }, element.getDisplayname(),
-                        element.getLore()));
+                }, element.getStack(), false, -1));
+
                 case CONFIRM_AGE -> {
-                    furnaceGui.setActualAge(actualAge.get());
-                    ItemStack ageStack = furnaceGui.getCustomStack() != null ? furnaceGui.getCustomStack() : element.getStack();
-                    furnaceGui.addElement(new FurnaceElement(element.getIntPos(), true, -1, ageStack, click -> {
+                    FurnaceGui furnace = furnaceGuis.get(player.getUniqueId());
+                    taskMap.get(furnace).setAge(actualAge.get());
+
+                    ItemStack ageStack = furnace.getCustomStack(actualAge.get()) != null ? furnace.getCustomStack(actualAge.get()) : element.getStack();
+
+                    furnaceGui.addElement(new FurnaceElement(element.getDisplayname(), element.getLore(), element.getIntPos(), click -> {
                         personUtil.getPerson(player.getUniqueId()).setAge(actualAge.get());
-                        furnaceGui.setCompleted(true);
+
+                        taskMap.get(furnace).setCompleted(true);
+                        removeFurnace(player.getUniqueId(), furnaceGui);
+
                         if (!setup) {
                             customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
-                            player.sendMessage(Lang.AGE_EDITED);
+                            audience.player(player).sendMessage(Lang.AGE_EDITED);
                             player.closeInventory();
                             return;
                         }
                         InventoryManager inventoryManager = new InventoryManager();
-                        inventoryManager.openNextInventory(player, plugin, personUtil, this, postProcessCommands, customConfigsInit, setup);
-                    }, element.getDisplayname(),
-                            element.getLore()));
+                        inventoryManager.openNextInventory(player, plugin, personUtil, this, postProcessCommands, customConfigsInit, true);
+                    }, ageStack, true, -1));
+
                 }
             }
 
@@ -370,12 +388,12 @@ public class Inventories extends AbstractInventories {
                 .onComplete((player, text) -> {                                    //called when the inventory output slot is clicked
                     if(Settings.LASTNAME_REQUIRED) {
                         if(!text.contains(" ")) {
-                            player.sendMessage(Lang.LASTNAME_REQUIRED);
+                            audience.player(player).sendMessage (Lang.LASTNAME_REQUIRED);
                             return AnvilGUI.Response.text(LegacyComponentSerializer.legacySection().serialize(Lang.LASTNAME_REQUIRED));
                         } else {
                             String[] textSplit = text.trim().replaceAll(" +", " ").split(" ");
                             personUtil.getPerson(player.getUniqueId()).setName(FormatUtils.firstUppercase(textSplit[0]) + " " + FormatUtils.firstUppercase(textSplit[1]));
-                            player.sendMessage(Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
+                            audience.player(player).sendMessage (Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
                                     .matchLiteral("%name%").replacement(FormatUtils.firstUppercase(textSplit[0]) + " " + FormatUtils.firstUppercase(textSplit[1])).build()));
                             return AnvilGUI.Response.close();
                         }
@@ -391,7 +409,7 @@ public class Inventories extends AbstractInventories {
 
 
                         personUtil.getPerson(player.getUniqueId()).setName(FormatUtils.firstUppercase(finalText));
-                        player.sendMessage(Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
+                        audience.player(player).sendMessage (Lang.NAME_CONFIRMED.replaceText(TextReplacementConfig.builder()
                                 .matchLiteral("%name%").replacement(FormatUtils.firstUppercase(finalText)).build()));
 
                         return AnvilGUI.Response.close();
@@ -402,7 +420,7 @@ public class Inventories extends AbstractInventories {
                         InventoryManager inventoryManager = new InventoryManager();
                         if(!setup) {
                             customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
-                            player.sendMessage(Lang.NAME_EDITED);
+                            audience.player(player).sendMessage (Lang.NAME_EDITED);
                             player.closeInventory();
                             return;
                         }

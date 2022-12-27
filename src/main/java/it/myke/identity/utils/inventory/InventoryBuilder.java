@@ -3,6 +3,7 @@ package it.myke.identity.utils.inventory;
 import com.cryptomorin.xseries.XMaterial;
 import it.myke.identity.disk.Settings;
 import it.myke.identity.utils.CustomHeads;
+import it.myke.identity.utils.Legacy;
 import it.myke.identity.utils.config.CustomConfigsInit;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -36,7 +37,10 @@ public class InventoryBuilder {
         String fillerPath = customConfigsInit.getInventoriesConfig().getString(inventory + ".filler");
         if(fillerPath != null) {
             ItemStack filler = XMaterial.matchXMaterial(fillerPath).get().parseItem();
-            filler.editMeta(meta -> meta.setCustomModelData(customConfigsInit.getInventoriesConfig().getInt(inventory + ".filler-data")));
+            ItemMeta meta = filler.getItemMeta();
+            meta.setCustomModelData(customConfigsInit.getInventoriesConfig().getInt(inventory + ".filler-data"));
+            filler.setItemMeta(meta);
+
             this.filler = filler;
         }
         return this;
@@ -47,8 +51,8 @@ public class InventoryBuilder {
         if(!Objects.equals(elementSection.getString("material"), "CUSTOM_HEAD")) {
             ItemStack stack = XMaterial.matchXMaterial(elementSection.getString("material")).get().parseItem();
             ItemMeta meta = stack.getItemMeta();
-            meta.displayName(MiniMessage.miniMessage().deserialize(elementSection.getString("name")).decoration(TextDecoration.ITALIC, false));
-            meta.lore(Settings.translate(elementSection.getStringList("lore")));
+            meta.setDisplayName(Legacy.translate(MiniMessage.miniMessage().deserialize(elementSection.getString("name")).decoration(TextDecoration.ITALIC, false)));
+            meta.setLore(Legacy.translate(Settings.translate(elementSection.getStringList("lore"))));
             meta.setCustomModelData(elementSection.getInt("custom-model-data"));
             stack.setItemMeta(meta);
             return stack;

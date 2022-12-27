@@ -11,6 +11,7 @@ import it.myke.identity.utils.config.CustomConfigsInit;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,6 +19,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import redempt.ordinate.parser.metadata.CommandHook;
 
+import static it.myke.identity.Identity.audience;
 import static it.myke.identity.inventories.Inventories.inventories;
 
 public class CommandListener {
@@ -39,60 +41,72 @@ public class CommandListener {
 
     @CommandHook("reload")
     public void reload(CommandSender sender) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<color:#00FF42>Reloading Configuration files..."));
+        Player player = (Player) sender;
+        
+        audience.player(player).sendMessage(MiniMessage.miniMessage().deserialize("<color:#00FF42>Reloading Configuration files..."));
         customConfigsInit.reloadConfigs();
 
         new Settings(customConfigsInit.getSettingsConfig()).init();
         new Lang(customConfigsInit.getLangConfig()).init();
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<color:#AEFF00>Configs reload process completed!"));
+        audience.player(player).sendMessage(MiniMessage.miniMessage().deserialize("<color:#AEFF00>Configs reload process completed!"));
     }
 
 
     @CommandHook("removePlayer")
     public void removePlayer(CommandSender sender, OfflinePlayer offlinePlayer) {
+        Player player = (Player) sender;
+        
         if(customConfigsInit.getDataConfig().isConfigurationSection("data."+ offlinePlayer.getUniqueId())) {
             customConfigsInit.getDataConfig().set("data." + offlinePlayer.getUniqueId(), null);
             customConfigsInit.reload("data.yml");
 
-            sender.sendMessage(Lang.PLAYER_RESET.replaceText(TextReplacementConfig.builder()
+            audience.player(player).sendMessage(Lang.PLAYER_RESET.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("%removed%")
                     .replacement(offlinePlayer.getName()).build()));
             if(offlinePlayer.isOnline()) {
-                offlinePlayer.getPlayer().kick(Lang.IDENTITY_RESET_KICKMESSAGE);
+                offlinePlayer.getPlayer().kickPlayer(LegacyComponentSerializer.legacySection().serialize(Lang.IDENTITY_RESET_KICKMESSAGE));
             }
         } else {
-            sender.sendMessage(Lang.PLAYER_NOT_FOUND.replaceText(TextReplacementConfig.builder()
+            audience.player(player).sendMessage(Lang.PLAYER_NOT_FOUND.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("%removed%").replacement(offlinePlayer.getName()).build()));
         }
     }
 
     @CommandHook("papi")
     public void papi(CommandSender sender) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<color:#00E230>Available Placeholders <gray><bold>» </bold><white>%identity_name%<color:#00E230>,<white> %identity_surname%<color:#00E230>,<white> %identity_fullname%<color:#00E230>,<white> %identity_age%<color:#00E230>,<white> %identity_gender%"));
+        Player player = (Player) sender;
+        
+        audience.player(player).sendMessage(MiniMessage.miniMessage().deserialize("<color:#00E230>Available Placeholders <gray><bold>» </bold><white>%identity_name%<color:#00E230>,<white> %identity_surname%<color:#00E230>,<white> %identity_fullname%<color:#00E230>,<white> %identity_age%<color:#00E230>,<white> %identity_gender%"));
     }
 
     @CommandHook("copyright")
     public void copyright(CommandSender sender) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("\n<color:#00E230>This Server is running on the " + main.getDescription().getVersion() + " version of Identity! <gray>(MikesLab creation | www.mikeslab.it)\n"));
+        Player player = (Player) sender;
+        
+        audience.player(player).sendMessage(MiniMessage.miniMessage().deserialize("\n<color:#00E230>This Server is running on the " + main.getDescription().getVersion() + " version of Identity! <gray>(MikesLab creation | www.mikeslab.it)\n"));
     }
 
 
     @CommandHook("showupdates")
     public void showupdates(CommandSender sender) {
+        Player player = (Player) sender;
+        
         inventories.get("update-" + main.getDescription().getVersion().replace(".", "-")).show((HumanEntity) sender);
     }
 
 
     @CommandHook("setName")
     public void setName(CommandSender sender, OfflinePlayer target, String firstName, String lastName)  {
+        Player player = (Player) sender;
+        
         if(!Settings.NAME_ENABLED) {
-            sender.sendMessage(Lang.NAME_DISABLED);
+            audience.player(player).sendMessage(Lang.NAME_DISABLED);
             return;
         }
 
         if(!Settings.LASTNAME_REQUIRED) {
             if(lastName == null) {
-                sender.sendMessage(Lang.LASTNAME_REQUIRED);
+                audience.player(player).sendMessage(Lang.LASTNAME_REQUIRED);
                 return;
             }
 
@@ -101,7 +115,7 @@ public class CommandListener {
 
 
 
-            sender.sendMessage(Lang.NAME_SET_OTHER
+            audience.player(player).sendMessage(Lang.NAME_SET_OTHER
                     .replaceText(TextReplacementConfig.builder()
                             .matchLiteral("%name%").replacement(finalName)
                             .matchLiteral("%player%").replacement(target.getName()).build()));
@@ -109,7 +123,7 @@ public class CommandListener {
         } else {
             String finalName = FormatUtils.firstUppercase(firstName);
             personUtil.setName(target.getUniqueId(), customConfigsInit, finalName);
-            sender.sendMessage(Lang.NAME_SET_OTHER
+            audience.player(player).sendMessage(Lang.NAME_SET_OTHER
                     .replaceText(TextReplacementConfig.builder()
                             .matchLiteral("%name%").replacement(finalName)
                             .matchLiteral("%player%").replacement(target.getName()).build()));
@@ -118,27 +132,29 @@ public class CommandListener {
 
     @CommandHook("setAge")
     public void setAge(CommandSender sender, OfflinePlayer target, int age) {
+        Player player = (Player) sender;
+        
         if(!Settings.AGE_ENABLED) {
-            sender.sendMessage(Lang.AGE_DISABLED);
+            audience.player(player).sendMessage(Lang.AGE_DISABLED);
             return;
         }
 
         if(age < Settings.MIN_AGE) {
-            sender.sendMessage(Lang.MIN_AGE_REACHED
+            audience.player(player).sendMessage(Lang.MIN_AGE_REACHED
                     .replaceText(TextReplacementConfig.builder()
                             .matchLiteral("%age%").replacement(String.valueOf(age)).build()));
             return;
         }
 
         if(age > Settings.MAX_AGE) {
-            sender.sendMessage(Lang.MAX_AGE_REACHED
+            audience.player(player).sendMessage(Lang.MAX_AGE_REACHED
                     .replaceText(TextReplacementConfig.builder()
                             .matchLiteral("%age%").replacement(String.valueOf(age)).build()));
             return;
         }
 
         personUtil.setAge(target.getUniqueId(), customConfigsInit, age);
-        sender.sendMessage(Lang.AGE_SET_OTHER
+        audience.player(player).sendMessage(Lang.AGE_SET_OTHER
                 .replaceText(TextReplacementConfig.builder()
                         .matchLiteral("%age%").replacement(String.valueOf(age))
                         .matchLiteral("%player%").replacement(target.getName()).build()));
@@ -147,8 +163,10 @@ public class CommandListener {
 
     @CommandHook("setGender")
     public void setGender(CommandSender sender, OfflinePlayer target, String gender) {
+        Player player = (Player) sender;
+        
         if(!Settings.GENDER_ENABLED) {
-            sender.sendMessage(Lang.GENDER_DISABLED);
+            audience.player(player).sendMessage(Lang.GENDER_DISABLED);
             return;
         }
 
@@ -158,20 +176,20 @@ public class CommandListener {
 
         if(gender.equalsIgnoreCase(male)) {
             personUtil.setGender(((Player) sender).getUniqueId(), customConfigsInit, gender);
-            sender.sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
+            audience.player(player).sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("%player%").replacement(target.getName())
                     .matchLiteral("%gender%").replacement(male).build()));
         } else if(gender.equalsIgnoreCase(female)) {
             personUtil.setGender(((Player) sender).getUniqueId(), customConfigsInit, gender);
-            sender.sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
+            audience.player(player).sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("%player%").replacement(target.getName())
                     .matchLiteral("%gender%").replacement(female).build()));
         }else if(gender.equalsIgnoreCase(nonbinary)) {
             personUtil.setGender(((Player) sender).getUniqueId(), customConfigsInit, gender);
-            sender.sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
+            audience.player(player).sendMessage(Lang.GENDER_SET_OTHER.replaceText(TextReplacementConfig.builder()
                     .matchLiteral("%player%").replacement(target.getName())
                     .matchLiteral("%gender%").replacement(nonbinary).build()));
-        } else sender.sendMessage(Lang.GENDER_NOT_VALID.replaceText(TextReplacementConfig.builder()
+        } else audience.player(player).sendMessage(Lang.GENDER_NOT_VALID.replaceText(TextReplacementConfig.builder()
                 .matchLiteral("%gender%").replacement(gender).build()));
     }
 
@@ -179,13 +197,15 @@ public class CommandListener {
 
     @CommandHook("editGender")
     public void editGender(CommandSender sender) {
+        Player player = (Player) sender;
+        
         if(!Settings.GENDER_ENABLED) {
-            sender.sendMessage(Lang.GENDER_DISABLED);
+            audience.player(player).sendMessage(Lang.GENDER_DISABLED);
             return;
         }
 
         if(!customConfigsInit.getDataConfig().isConfigurationSection("data." + ((Player) sender).getUniqueId())) {
-            sender.sendMessage(Lang.IDENTITY_AINT_SET);
+            audience.player(player).sendMessage(Lang.IDENTITY_AINT_SET);
             return;
         }
 
@@ -197,13 +217,14 @@ public class CommandListener {
 
     @CommandHook("editAge")
     public void editAge(CommandSender sender) {
+        Player player = (Player) sender;
         if(!Settings.AGE_ENABLED) {
-            sender.sendMessage(Lang.AGE_DISABLED);
+            audience.player(player).sendMessage(Lang.AGE_DISABLED);
             return;
         }
 
         if(!customConfigsInit.getDataConfig().isConfigurationSection("data." + ((Player) sender).getUniqueId())) {
-            sender.sendMessage(Lang.IDENTITY_AINT_SET);
+            audience.player(player).sendMessage(Lang.IDENTITY_AINT_SET);
             return;
         }
 
@@ -215,13 +236,14 @@ public class CommandListener {
 
     @CommandHook("editName")
     public void editName(CommandSender sender) {
+        Player player = (Player) sender;
         if(!Settings.NAME_ENABLED) {
-            sender.sendMessage(Lang.NAME_DISABLED);
+            audience.player(player).sendMessage(Lang.NAME_DISABLED);
             return;
         }
 
         if(!customConfigsInit.getDataConfig().isConfigurationSection("data." + ((Player) sender).getUniqueId())) {
-            sender.sendMessage(Lang.IDENTITY_AINT_SET);
+            audience.player(player).sendMessage(Lang.IDENTITY_AINT_SET);
             return;
         }
 

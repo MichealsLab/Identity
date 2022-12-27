@@ -11,6 +11,8 @@ import it.myke.identity.utils.inventory.GenderCommands;
 import it.myke.identity.utils.postprocess.PostProcessCommands;
 import org.bukkit.entity.Player;
 
+import static it.myke.identity.Identity.audience;
+
 public class InventoryManager {
 
 
@@ -40,7 +42,7 @@ public class InventoryManager {
         if (setup) {
             String nxtInventory = getNextInventory(player, personUtil);
             if (nxtInventory == null) {
-                player.sendMessage(Lang.SETUP_COMPLETED);
+                audience.player(player).sendMessage(Lang.SETUP_COMPLETED);
                 customConfigsInit.saveInConfig(player.getUniqueId(), personUtil);
                 String gender = personUtil.getPerson(player.getUniqueId()).getGender();
                 personUtil.removePerson(player.getUniqueId());

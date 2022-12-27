@@ -30,8 +30,8 @@ public class CustomHeads {
             } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ex3) {
                 ex3.printStackTrace();
             }
-            skullMeta.displayName(name);
-            skullMeta.lore(lore);
+            skullMeta.setDisplayName(Legacy.translate(name));
+            skullMeta.setLore(Legacy.translate(lore));
             head.setItemMeta(skullMeta);
         }
         return head;

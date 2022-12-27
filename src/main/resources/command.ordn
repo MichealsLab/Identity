@@ -33,7 +33,6 @@ identity {
     hook = setName
     help = Sets the name of the player.
   }
-
   setGender offlineplayer:target string:gender {
     playerOnly
     permission = identity.set.gender
@@ -46,21 +45,18 @@ identity {
     hook = editGender
     help = Overwrite actual gender.
   }
-
   age {
     playerOnly
     permission = identity.edit.age
     hook = editAge
     help = Overwrite actual age.
   }
-
   name {
     playerOnly
     permission = identity.edit.name
     hook = editName
     help = Overwrite actual name.
   }
-
   setup {
     permission = identity.setup
     hook = setup
